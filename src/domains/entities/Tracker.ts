@@ -7,6 +7,6 @@ export default class Tracker implements ITracker {
     public carrier: ICarrier,
     public label: string,
     public trackingNumber: string,
-    public memos: string[]
+    public memos: string[],
   ) {}
 }

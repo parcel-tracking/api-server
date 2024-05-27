@@ -18,7 +18,7 @@ export default class TrackerUseCase implements ITrackerUseCase {
   }
 
   async updateTracker(trackerId: string, tracker: ITrackerDTO) {
-    return await this.trackerRepository.updateTracker(trackerId, tracker)  
+    return await this.trackerRepository.updateTracker(trackerId, tracker)
   }
 
   async deleteTracker(trackerId: string) {

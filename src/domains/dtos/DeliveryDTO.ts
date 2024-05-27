@@ -8,6 +8,6 @@ export default class DeliveryDTO implements IDeliveryDTO {
     readonly from: IDeliveryLocationVO,
     readonly progresses: Array<IDeliveryProgressVO>,
     readonly state: IDeliveryStateVO,
-    readonly to: IDeliveryLocationVO
+    readonly to: IDeliveryLocationVO,
   ) {}
 }

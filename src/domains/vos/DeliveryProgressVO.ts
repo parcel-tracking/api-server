@@ -7,6 +7,6 @@ export default class DeliveryProgressVO implements IDeliveryProgressVO {
     readonly description: string = "",
     readonly location: string = "",
     readonly time: string = "",
-    readonly status: IDeliveryStateVO = new DeliveryStateVO()
+    readonly status: IDeliveryStateVO = new DeliveryStateVO(),
   ) {}
 }

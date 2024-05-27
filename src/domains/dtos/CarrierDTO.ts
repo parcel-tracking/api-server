@@ -6,6 +6,6 @@ export default class CarrierDTO implements ICarrierDTO {
     readonly id: string,
     readonly name: string,
     readonly isCrawlable: boolean,
-    readonly popupAPIUrl: string
+    readonly popupAPIUrl: string,
   ) {}
 }
