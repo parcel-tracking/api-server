@@ -1,8 +1,22 @@
 import ITrackerDTO from "../../dtos/interfaces/ITrackerDTO"
+import ICarrier from "../../entities/interfaces/ICarrier"
+import ITracker from "../../entities/interfaces/ITracker"
 
 export default interface ITrackerUseCase {
+  addTracker(): Promise<boolean>
   getTrackers(): Promise<ITrackerDTO[]>
-  addTracker(tracker: ITrackerDTO): Promise<boolean>
-  updateTracker(trackerId: string, tracker: ITrackerDTO): Promise<boolean>
+  updateCarrier(tracker: ITracker, newCarrier: ICarrier): Promise<boolean>
+  updateLabel(tracker: ITracker, newLabel: string): Promise<boolean>
+  updateTrackingNumber(
+    tracker: ITracker,
+    newTrackingNumber: string
+  ): Promise<boolean>
+  addMemo(tracker: ITracker): Promise<boolean>
+  updateMemo(
+    tracker: ITracker,
+    index: number,
+    newMemo: string
+  ): Promise<boolean>
+  deleteMemo(tracker: ITracker, index: number): Promise<boolean>
   deleteTracker(trackerId: string): Promise<boolean>
 }
