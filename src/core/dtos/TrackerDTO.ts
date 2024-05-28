@@ -1,4 +1,4 @@
-import ICarrier from "../entities/interfaces/ICarrier"
+import ICarrier from "../domains/entities/interfaces/ICarrier"
 import ITrackerDTO from "./interfaces/ITrackerDTO"
 
 export default class TrackerDTO implements ITrackerDTO {

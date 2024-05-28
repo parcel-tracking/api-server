@@ -1,7 +1,7 @@
-import IDeliveryDTO from "./interfaces/IDeliveryDTO"
 import IDeliveryLocationVO from "../vos/interfaces/IDeliveryLocationVO"
 import IDeliveryProgressVO from "../vos/interfaces/IDeliveryProgressVO"
 import IDeliveryStateVO from "../vos/interfaces/IDeliveryStateVO"
+import IDeliveryDTO from "./interfaces/IDeliveryDTO"
 
 export default class DeliveryDTO implements IDeliveryDTO {
   constructor(

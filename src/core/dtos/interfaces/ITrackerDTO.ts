@@ -1,4 +1,4 @@
-import ICarrier from "../../entities/interfaces/ICarrier"
+import ICarrier from "../../domains/entities/interfaces/ICarrier"
 
 export default interface ITrackerDTO {
   readonly id: string

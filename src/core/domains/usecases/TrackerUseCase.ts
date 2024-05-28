@@ -1,7 +1,7 @@
+import ITrackerRepository from "../../repositories/interfaces/ITrackerRepository"
 import Tracker from "../entities/Tracker"
 import ICarrier from "../entities/interfaces/ICarrier"
 import ITracker from "../entities/interfaces/ITracker"
-import ITrackerRepository from "../interfaces/ITrackerRepository"
 import ITrackerUseCase from "./interfaces/ITrackerUseCase"
 
 export default class TrackerUseCase implements ITrackerUseCase {
@@ -9,6 +9,10 @@ export default class TrackerUseCase implements ITrackerUseCase {
 
   constructor(trackerRepository: ITrackerRepository) {
     this.trackerRepository = trackerRepository
+  }
+
+  async getDelivery(carrierId: string, trackingNumber: string) {
+    return await this.trackerRepository.getDelivery(carrierId, trackingNumber)
   }
 
   async addTracker() {

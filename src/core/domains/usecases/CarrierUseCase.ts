@@ -1,4 +1,4 @@
-import ICarrierRepository from "../interfaces/ICarrierRepository"
+import ICarrierRepository from "../../repositories/interfaces/ICarrierRepository"
 import ICarrierUseCase from "./interfaces/ICarrierUseCase"
 
 export default class CarrierUseCase implements ICarrierUseCase {
