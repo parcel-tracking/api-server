@@ -7,6 +7,4 @@ export default abstract class Carrier implements ICarrier {
     readonly name: string,
     readonly isCrawlable: boolean
   ) {}
-
-  abstract getPopupURL(trackingNumber: string): string
 }

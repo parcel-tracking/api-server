@@ -3,5 +3,4 @@ export default interface ICarrier {
   readonly id: string
   readonly name: string
   readonly isCrawlable: boolean
-  getPopupURL(trackingNumber: string): string
 }

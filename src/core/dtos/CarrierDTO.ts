@@ -6,11 +6,6 @@ export default class CarrierDTO implements ICarrierDTO {
     readonly no: number,
     readonly id: string,
     readonly name: string,
-    readonly isCrawlable: boolean,
-    private readonly carrier: ICarrier
+    readonly isCrawlable: boolean
   ) {}
-
-  getPopupURL(trackingNumber: string): string {
-    return this.carrier.getPopupURL(trackingNumber)
-  }
 }
