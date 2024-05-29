@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common"
-import { CarrierModule } from "./CarrierModule"
 import { AppController } from "../controllers/AppController"
+import TrackerModule from "./TrackerModule"
 
 @Module({
-  imports: [CarrierModule],
+  imports: [TrackerModule],
   controllers: [AppController],
   providers: []
 })
