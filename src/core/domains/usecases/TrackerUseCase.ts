@@ -1,6 +1,5 @@
 import ITrackerRepository from "../../repositories/interfaces/ITrackerRepository"
 import Tracker from "../entities/Tracker"
-import ICarrier from "../entities/interfaces/ICarrier"
 import ITracker from "../entities/interfaces/ITracker"
 import ITrackerUseCase from "./interfaces/ITrackerUseCase"
 
@@ -24,8 +23,8 @@ export default class TrackerUseCase implements ITrackerUseCase {
     return await this.trackerRepository.getTrackers()
   }
 
-  async updateCarrier(tracker: ITracker, newCarrier: ICarrier) {
-    tracker.updateCarrier(newCarrier)
+  async updateCarrierId(tracker: ITracker, newCarrierId: string) {
+    tracker.updateCarrierId(newCarrierId)
     return await this.trackerRepository.updateTracker(tracker)
   }
 

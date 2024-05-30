@@ -1,13 +1,11 @@
 import { randomUUID } from "crypto"
-import ICarrier from "./interfaces/ICarrier"
 import ITracker from "./interfaces/ITracker"
-import EPostFactory from "../factories/carriers/EPostFactory"
 
 export default class Tracker implements ITracker {
   readonly id: string
 
   constructor(
-    public carrier: ICarrier = new EPostFactory().newCarrier(),
+    public carrierId: string = "",
     public label: string = "",
     public trackingNumber: string = "",
     public memos: string[] = []
@@ -15,8 +13,8 @@ export default class Tracker implements ITracker {
     this.id = randomUUID()
   }
 
-  updateCarrier(newCarrier: ICarrier) {
-    this.carrier = newCarrier
+  updateCarrierId(newCarrierId: string) {
+    this.carrierId = newCarrierId
   }
 
   updateLabel(newLabel: string) {

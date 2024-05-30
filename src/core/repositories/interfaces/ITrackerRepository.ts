@@ -9,7 +9,7 @@ export default interface ITrackerRepository {
     trackingNumber: string
   ): Promise<IDeliveryDTO | IErrorDTO>
   getTrackers?(): Promise<ITrackerDTO[]>
-  addTracker?(tracker: ITrackerDTO): Promise<boolean>
+  addTracker?(tracker: ITracker): Promise<boolean>
   updateTracker?(tracker: ITracker): Promise<boolean>
   deleteTracker?(trackerId: string): Promise<boolean>
 }
