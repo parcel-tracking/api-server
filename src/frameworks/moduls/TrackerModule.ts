@@ -7,4 +7,4 @@ import NCarrierRepository from "../repositories/NTrackerRepository"
   providers: [NCarrierRepository, NCarrierUseCase],
   controllers: [NCarriersController]
 })
-export default class CarrierModule {}
+export default class TrackerModule {}
