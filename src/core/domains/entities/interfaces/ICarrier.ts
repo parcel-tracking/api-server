@@ -1,8 +1,8 @@
 export default interface ICarrier {
-  no: number
-  id: string
-  name: string
-  isCrawlable: boolean
-  isPopupEnabled: boolean
-  popupURL: string
+  readonly no: number
+  readonly name: string
+  readonly displayName: string
+  readonly isCrawlable: boolean
+  readonly isPopupEnabled: boolean
+  readonly popupURL: string
 }
