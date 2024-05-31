@@ -9,7 +9,7 @@ export default interface ITrackerUseCase {
     trackingNumber: string
   ): Promise<IDeliveryDTO | IErrorDTO>
   addTracker(): Promise<boolean>
-  getTrackers(): Promise<ITrackerDTO[]>
+  getTrackers(): Promise<ITrackerDTO[] | IErrorDTO>
   updateCarrierId(tracker: ITracker, newCarrierId: string): Promise<boolean>
   updateLabel(tracker: ITracker, newLabel: string): Promise<boolean>
   updateTrackingNumber(
