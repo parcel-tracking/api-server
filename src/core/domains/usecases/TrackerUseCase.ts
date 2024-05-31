@@ -1,3 +1,4 @@
+import TrackerDTO from "../../dtos/TrackerDTO"
 import ITrackerRepository from "../../repositories/interfaces/ITrackerRepository"
 import Tracker from "../entities/Tracker"
 import ITracker from "../entities/interfaces/ITracker"
@@ -20,7 +21,17 @@ export default class TrackerUseCase implements ITrackerUseCase {
   }
 
   async getTrackers() {
-    return await this.trackerRepository.getTrackers()
+    const trackers = await this.trackerRepository.getTrackers()
+    const trackerDTOs = trackers.map((entity) => {
+      return new TrackerDTO(
+        entity.id,
+        entity.carrierId,
+        entity.label,
+        entity.trackingNumber,
+        entity.memos
+      )
+    })
+    return trackerDTOs
   }
 
   async updateCarrierId(tracker: ITracker, newCarrierId: string) {
