@@ -1,5 +1,5 @@
-import ICarrierDTO from "../../dtos/interfaces/ICarrierDTO"
+import ICarrier from "../../domains/entities/interfaces/ICarrier"
 
 export default interface ICarrierRepository {
-  getCarriers?(): Promise<ICarrierDTO[]>
+  getCarriers?(): Promise<ICarrier[]>
 }
