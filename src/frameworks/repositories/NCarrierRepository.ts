@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common"
-import ICarrierDTO from "../../core/dtos/interfaces/ICarrierDTO"
 import CarrierRepository from "../../adapters/repositories/CarrierRepository"
 import CarrierModel from "../models/CarrierModel"
 import { InjectModel } from "@nestjs/sequelize"
 import CarrierDTO from "../../core/dtos/CarrierDTO"
+import Carrier from "../../core/domains/entities/Carrier"
+import ICarrier from "../../core/domains/entities/interfaces/ICarrier"
 
 @Injectable()
 export default class NCarrierRepository extends CarrierRepository {
@@ -14,10 +15,10 @@ export default class NCarrierRepository extends CarrierRepository {
     super()
   }
 
-  async getCarriers(): Promise<ICarrierDTO[]> {
+  async getCarriers(): Promise<ICarrier[]> {
     const carrierModels = await this.carrierModel.findAll()
-    const carrierDTOs = carrierModels.map((model) => {
-      return new CarrierDTO(
+    const carriers = carrierModels.map((model) => {
+      return new Carrier(
         model.no,
         model.name,
         model.displayName,
@@ -26,6 +27,6 @@ export default class NCarrierRepository extends CarrierRepository {
         model.popupURL
       )
     })
-    return carrierDTOs
+    return carriers
   }
 }
