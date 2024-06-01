@@ -1,6 +1,6 @@
 import ITrackerUseCase from "../../core/domains/usecases/interfaces/ITrackerUseCase"
 import IDeliveryDTO from "../../core/dtos/interfaces/IDeliveryDTO"
-import IErrorDTO from "../../core/dtos/interfaces/IErrorDTO"
+import ILayerDTO from "../../core/dtos/interfaces/ILayerDTO"
 import ITrackerController from "./interfaces/ITrackerController"
 
 export default class TrackerController implements ITrackerController {
@@ -9,7 +9,7 @@ export default class TrackerController implements ITrackerController {
   async getDelivery(
     carrierId: string,
     trackingNumber: string
-  ): Promise<IDeliveryDTO | IErrorDTO> {
+  ): Promise<ILayerDTO<IDeliveryDTO>> {
     return await this.trackerUseCase.getDelivery(carrierId, trackingNumber)
   }
 }

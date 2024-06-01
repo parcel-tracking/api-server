@@ -2,7 +2,7 @@ import { Controller, Get, Param } from "@nestjs/common"
 import TrackerController from "../../adapters/controllers/TrackerController"
 import NTrackerUseCase from "../usecases/NTrackerUseCase"
 import IDeliveryDTO from "../../core/dtos/interfaces/IDeliveryDTO"
-import IErrorDTO from "../../core/dtos/interfaces/IErrorDTO"
+import ILayerDTO from "../../core/dtos/interfaces/ILayerDTO"
 
 @Controller("tracker")
 export default class NTrackerController extends TrackerController {
@@ -14,7 +14,7 @@ export default class NTrackerController extends TrackerController {
   async getDelivery(
     @Param("carrierId") carrierId: string,
     @Param("trackingNumber") trackingNumber: string
-  ): Promise<IDeliveryDTO | IErrorDTO> {
+  ): Promise<ILayerDTO<IDeliveryDTO>> {
     return super.getDelivery(carrierId, trackingNumber)
   }
 }

@@ -1,14 +1,15 @@
 import { Injectable } from "@nestjs/common"
 import TrackerRepository from "../../adapters/repositories/TrackerRepository"
 import IDeliveryDTO from "../../core/dtos/interfaces/IDeliveryDTO"
-import IErrorDTO from "../../core/dtos/interfaces/IErrorDTO"
+import ILayerDTO from "../../core/dtos/interfaces/ILayerDTO"
+import ICarrier from "../../core/domains/entities/interfaces/ICarrier"
 
 @Injectable()
 export default class NTrackerRepository extends TrackerRepository {
   async getDelivery(
-    carrierId: string,
+    carrier: ICarrier,
     trackingNumber: string
-  ): Promise<IDeliveryDTO | IErrorDTO> {
-    return super.getDelivery(carrierId, trackingNumber)
+  ): Promise<ILayerDTO<IDeliveryDTO>> {
+    return super.getDelivery(carrier, trackingNumber)
   }
 }

@@ -1,3 +1,4 @@
+import { UUIDV4 } from "sequelize"
 import { Column, Model, Table, DataType } from "sequelize-typescript"
 
 @Table
@@ -8,6 +9,13 @@ export default class CarrierModel extends Model<CarrierModel> {
     primaryKey: true
   })
   id: number
+
+  @Column({
+    type: DataType.UUID,
+    defaultValue: UUIDV4,
+    allowNull: false
+  })
+  uid: string
 
   @Column({
     type: DataType.INTEGER,

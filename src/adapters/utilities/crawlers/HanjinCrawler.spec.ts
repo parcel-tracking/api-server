@@ -1,51 +1,34 @@
 import * as cheerio from "cheerio"
-import EPostMockHTML from "./EPostMockHTML"
-import { decode } from "html-entities"
 import DeliveryLocationVO from "../../../core/vos/DeliveryLocationVO"
 import DeliveryProgressVO from "../../../core/vos/DeliveryProgressVO"
 import StringHelper from "../helpers/StringHelper"
 import DeliveryStateGenerator from "../helpers/DeliveryStateGenerator"
 import DeliveryDTO from "../../../core/dtos/DeliveryDTO"
+import HanjinMockHTML from "./HanjinMockHTML"
 
-describe("EPostCrawler", () => {
+describe("HanjinCrawler", () => {
   it("should fetch and parse tracking information", async () => {
     const parseStatus = (value: string) => {
-      if (value.includes("접수")) {
+      if (value.includes("집하")) {
         return DeliveryStateGenerator.getState("상품인수")
       }
-      if (value.includes("배달준비")) {
+      if (value.includes("배송출발")) {
         return DeliveryStateGenerator.getState("배달출발")
       }
-      if (value.includes("배달완료")) {
+      if (value.includes("배송완료")) {
         return DeliveryStateGenerator.getState("배달완료")
       }
       return DeliveryStateGenerator.getState("상품이동중")
     }
 
-    const parseDateTime = (value: string) => {
-      const dateTime = value.split(" ")
-      const time = dateTime.length > 1 ? " " + dateTime[1] + ":00" : ""
-      return dateTime[0].replace(/\./g, "-") + time
+    const parseDateTime = (date: string, time: string) => {
+      return date + " " + time + ":00"
     }
 
-    const $ = cheerio.load(EPostMockHTML)
-    const $informationTable = $("#print").find("table")
-    const $progressTable = $("#processTable")
+    const $ = cheerio.load(HanjinMockHTML)
+    const $informationTable = $(".delivery-tbl").find("tbody")
+    const $progressTable = $(".waybill-tbl").find("table")
     const $informations = $informationTable.find("td")
-
-    const from = decode($informations.eq(0).html()).split("<br>")
-    const to = decode($informations.eq(1).html()).split("<br>")
-
-    const fromVO = new DeliveryLocationVO({
-      name: from[0],
-      time: parseDateTime(from[1])
-    })
-    const fromData = new DeliveryLocationVO({
-      name: "테스트익스프레스",
-      time: "2024-03-15",
-      address: ""
-    })
-    expect(fromVO).toStrictEqual(fromData)
 
     const progressVOs = []
     $progressTable
@@ -53,12 +36,9 @@ describe("EPostCrawler", () => {
       .find("tr")
       .each((_, element) => {
         const td = $(element).find("td")
-        const descriptionText = StringHelper.trim(td.eq(3).text())
-        const description = descriptionText.includes("소포 물품 사진")
-          ? "접수"
-          : descriptionText
-        const location = td.eq(2).find("a").eq(0).text()
-        const time = parseDateTime(td.eq(0).html() + " " + td.eq(1).html())
+        const description = StringHelper.trim(td.eq(3).text())
+        const location = StringHelper.trim(td.eq(2).text())
+        const time = parseDateTime(td.eq(0).text(), td.eq(1).text())
         const state = parseStatus(td.eq(3).text())
         progressVOs.push(
           new DeliveryProgressVO({
@@ -70,23 +50,35 @@ describe("EPostCrawler", () => {
         )
       })
     progressVOs.reverse()
-    expect(progressVOs.length).toBe(6)
+    expect(progressVOs.length).toBe(8)
+
+    const fromVO = new DeliveryLocationVO({
+      name: $informations.eq(1).text(),
+      time:
+        progressVOs.length > 0 ? progressVOs[progressVOs.length - 1].time : ""
+    })
+    const fromData = new DeliveryLocationVO({
+      name: "주식**",
+      time: "2024-04-12 17:08:00",
+      address: ""
+    })
+    expect(fromVO).toStrictEqual(fromData)
 
     const stateVO =
       progressVOs.length > 0 ? progressVOs[0].state : parseStatus("상품준비중")
 
     const toVO = new DeliveryLocationVO({
-      name: to[0],
+      name: $informations.eq(2).text(),
       time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
     })
     const toData = new DeliveryLocationVO({
       name: "테*트",
-      time: "2024-03-18 12:12:00",
+      time: "2024-04-15 14:10:00",
       address: ""
     })
     expect(toVO).toStrictEqual(toData)
 
-    const stateData = parseStatus("배달완료")
+    const stateData = parseStatus("배송완료")
     expect(stateVO).toStrictEqual(stateData)
 
     const deliveryDTO = new DeliveryDTO({

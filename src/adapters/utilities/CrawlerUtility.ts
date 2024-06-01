@@ -1,0 +1,21 @@
+import IDeliveryDTO from "../../core/dtos/interfaces/IDeliveryDTO"
+import ILayerDTO from "../../core/dtos/interfaces/ILayerDTO"
+import CJLogisticsCrawler from "./crawlers/CJLogisticsCrawler"
+import EPostCrawler from "./crawlers/EPostCrawler"
+import HanjinCrawler from "./crawlers/HanjinCrawler"
+
+export default class CrawlerUtility {
+  static getTrack(
+    carrierName: string,
+    trackingNumber: string
+  ): Promise<ILayerDTO<IDeliveryDTO>> {
+    switch (carrierName) {
+      case "epost":
+        return new EPostCrawler().getTrack(trackingNumber)
+      case "cjlogistics":
+        return new CJLogisticsCrawler().getTrack(trackingNumber)
+      case "hanjin":
+        return new HanjinCrawler().getTrack(trackingNumber)
+    }
+  }
+}

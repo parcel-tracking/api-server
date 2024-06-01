@@ -7,7 +7,13 @@ import CarrierModel from "../models/CarrierModel"
 
 @Module({
   imports: [SequelizeModule.forFeature([CarrierModel])],
-  providers: [NCarrierRepository, NCarrierUseCase],
+  providers: [
+    {
+      provide: "ICarrierRepository",
+      useClass: NCarrierRepository
+    },
+    NCarrierUseCase
+  ],
   controllers: [NCarriersController]
 })
 export default class CarrierModule {}
