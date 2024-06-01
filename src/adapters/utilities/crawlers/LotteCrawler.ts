@@ -6,25 +6,27 @@ import IDeliveryDTO from "../../../core/dtos/interfaces/IDeliveryDTO"
 import DeliveryStateGenerator from "../helpers/DeliveryStateGenerator"
 import ILayerDTO from "../../../core/dtos/interfaces/ILayerDTO"
 import LayerDTO from "../../../core/dtos/LayerDTO"
-import { decode } from "html-entities"
 import DeliveryProgressVO from "../../../core/vos/DeliveryProgressVO"
 import StringHelper from "../helpers/StringHelper"
 import ICrawler from "./interfaces/ICrawler"
 
-export default class EPostCrawler implements ICrawler {
+export default class LotteCrawler implements ICrawler {
   getTrack(trackingNumber: string): Promise<ILayerDTO<IDeliveryDTO>> {
     return new Promise((resolve) => {
       axios
-        .get(
-          `https://service.epost.go.kr/trace.RetrieveDomRigiTraceList.comm?sid1=${trackingNumber}`
+        .post(
+          `https://www.lotteglogis.com/home/reservation/tracking/linkView?InvNo=${trackingNumber}`
         )
         .then((res) => {
           const $ = cheerio.load(res.data)
-          const $informationTable = $("#print").find("table")
-          const $progressTable = $("#processTable")
-          const $informations = $informationTable.find("td")
+          const $wrap = $(".contArea")
+          console.log($wrap.html())
 
-          if ($informations.length === 0) {
+          const $informationTable = $wrap.find("table").eq(0)
+          const $progressTable = $wrap.find("table").eq(1)
+          const $informations = $informationTable.find("tbody").find("td")
+
+          if ($informations.length === 1) {
             resolve(
               new LayerDTO({
                 isError: true,
@@ -33,29 +35,18 @@ export default class EPostCrawler implements ICrawler {
             )
           }
 
-          const from = decode($informations.eq(0).html()).split("<br>")
-          const to = decode($informations.eq(1).html()).split("<br>")
-
-          const fromVO = new DeliveryLocationVO({
-            name: from[0],
-            time: this.parseDateTime(from[1])
-          })
-
           const progressVOs = []
           $progressTable
             .find("tbody")
             .find("tr")
             .each((_, element) => {
               const td = $(element).find("td")
-              const descriptionText = StringHelper.trim(td.eq(3).text())
-              const description = descriptionText.includes("소포 물품 사진")
-                ? "접수"
-                : descriptionText
-              const location = td.eq(2).find("a").eq(0).text()
+              const description = StringHelper.trim(td.eq(3).text())
+              const location = StringHelper.trim(td.eq(2).text())
               const time = this.parseDateTime(
-                td.eq(0).html() + " " + td.eq(1).html()
+                StringHelper.trim(td.eq(1).html())
               )
-              const state = this.parseStatus(td.eq(3).text())
+              const state = this.parseStatus(td.eq(0).text())
               progressVOs.push(
                 new DeliveryProgressVO({
                   description,
@@ -65,15 +56,22 @@ export default class EPostCrawler implements ICrawler {
                 })
               )
             })
-          progressVOs.reverse()
 
           const stateVO =
             progressVOs.length > 0
               ? progressVOs[0].state
               : this.parseStatus("상품준비중")
 
+          const fromVO = new DeliveryLocationVO({
+            name: $informations.eq(1).text(),
+            time:
+              progressVOs.length > 0
+                ? progressVOs[progressVOs.length - 1].time
+                : ""
+          })
+
           const toVO = new DeliveryLocationVO({
-            name: to[0],
+            name: $informations.eq(2).text(),
             time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
           })
 
@@ -102,22 +100,21 @@ export default class EPostCrawler implements ICrawler {
   }
 
   private parseDateTime(value: string) {
-    const dateTime = value.split(" ")
-    const time = dateTime.length > 1 ? " " + dateTime[1] + ":00" : ""
-    return dateTime[0].replace(/\./g, "-") + time
+    const dateTime = value.split("&nbsp;")
+    const date = dateTime[0]
+    const time =
+      dateTime[1] === "--:--" ? dateTime[1] + ":--" : dateTime[1] + ":00"
+    return date + " " + time
   }
 
-  private parseStatus(value: string) {
-    if (value.includes("상품준비중")) {
-      return DeliveryStateGenerator.getState("상품준비중")
-    }
-    if (value.includes("접수")) {
+  private parseStatus(value?: string) {
+    if (value.includes("상품접수")) {
       return DeliveryStateGenerator.getState("상품인수")
     }
-    if (value.includes("배달준비")) {
+    if (value.includes("배송 출발")) {
       return DeliveryStateGenerator.getState("배달출발")
     }
-    if (value.includes("배달완료")) {
+    if (value.includes("배달 완료")) {
       return DeliveryStateGenerator.getState("배달완료")
     }
     return DeliveryStateGenerator.getState("상품이동중")

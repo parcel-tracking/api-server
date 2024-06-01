@@ -3,6 +3,7 @@ import ILayerDTO from "../../core/dtos/interfaces/ILayerDTO"
 import CJLogisticsCrawler from "./crawlers/CJLogisticsCrawler"
 import EPostCrawler from "./crawlers/EPostCrawler"
 import HanjinCrawler from "./crawlers/HanjinCrawler"
+import LotteCrawler from "./crawlers/LotteCrawler"
 
 export default class CrawlerUtility {
   static getTrack(
@@ -16,6 +17,8 @@ export default class CrawlerUtility {
         return new CJLogisticsCrawler().getTrack(trackingNumber)
       case "hanjin":
         return new HanjinCrawler().getTrack(trackingNumber)
+      case "lotte":
+        return new LotteCrawler().getTrack(trackingNumber)
     }
   }
 }

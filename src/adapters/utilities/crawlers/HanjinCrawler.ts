@@ -6,7 +6,6 @@ import IDeliveryDTO from "../../../core/dtos/interfaces/IDeliveryDTO"
 import DeliveryStateGenerator from "../helpers/DeliveryStateGenerator"
 import ILayerDTO from "../../../core/dtos/interfaces/ILayerDTO"
 import LayerDTO from "../../../core/dtos/LayerDTO"
-import { decode } from "html-entities"
 import DeliveryProgressVO from "../../../core/vos/DeliveryProgressVO"
 import StringHelper from "../helpers/StringHelper"
 import ICrawler from "./interfaces/ICrawler"
@@ -14,7 +13,6 @@ import ICrawler from "./interfaces/ICrawler"
 export default class HanjinCrawler implements ICrawler {
   getTrack(trackingNumber: string): Promise<ILayerDTO<IDeliveryDTO>> {
     return new Promise((resolve) => {
-      console.log("a")
       axios
         .post(
           "https://www.hanjin.com/kor/CMS/DeliveryMgr/WaybillResult.do",
@@ -36,7 +34,7 @@ export default class HanjinCrawler implements ICrawler {
             resolve(
               new LayerDTO({
                 isError: true,
-                message: "해당 운송장이 존재하지 않습니다."
+                message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
               })
             )
           }

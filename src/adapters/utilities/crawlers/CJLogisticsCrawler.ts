@@ -42,7 +42,7 @@ export default class CJLogisticsCrawler implements ICrawler {
             resolve(
               new LayerDTO({
                 isError: true,
-                message: "해당 운송장이 존재하지 않습니다."
+                message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
               })
             )
           }

@@ -1,0 +1,95 @@
+import * as cheerio from "cheerio"
+import DeliveryLocationVO from "../../../core/vos/DeliveryLocationVO"
+import DeliveryProgressVO from "../../../core/vos/DeliveryProgressVO"
+import StringHelper from "../helpers/StringHelper"
+import DeliveryStateGenerator from "../helpers/DeliveryStateGenerator"
+import DeliveryDTO from "../../../core/dtos/DeliveryDTO"
+import LotteMockHTML from "./LotteMockHTML"
+
+describe("LotteCrawler", () => {
+  it("should fetch and parse tracking information", async () => {
+    const parseStatus = (value: string) => {
+      if (value.includes("상품접수")) {
+        return DeliveryStateGenerator.getState("상품인수")
+      }
+      if (value.includes("배송 출발")) {
+        return DeliveryStateGenerator.getState("배달출발")
+      }
+      if (value.includes("배달 완료")) {
+        return DeliveryStateGenerator.getState("배달완료")
+      }
+      return DeliveryStateGenerator.getState("상품이동중")
+    }
+
+    const parseDateTime = (value: string) => {
+      const dateTime = value.split("&nbsp;")
+      const date = dateTime[0]
+      const time =
+        dateTime[1] === "--:--" ? dateTime[1] + ":--" : dateTime[1] + ":00"
+      return date + " " + time
+    }
+
+    const $ = cheerio.load(LotteMockHTML)
+    const $informationTable = $("table").eq(0)
+    const $progressTable = $("table").eq(1)
+    const $informations = $informationTable.find("tbody").find("td")
+
+    const progressVOs = []
+    $progressTable
+      .find("tbody")
+      .find("tr")
+      .each((_, element) => {
+        const td = $(element).find("td")
+        const description = StringHelper.trim(td.eq(3).text())
+        const location = StringHelper.trim(td.eq(2).text())
+        const time = parseDateTime(StringHelper.trim(td.eq(1).html()))
+        const state = parseStatus(td.eq(0).text())
+        progressVOs.push(
+          new DeliveryProgressVO({
+            description,
+            location,
+            time,
+            state
+          })
+        )
+      })
+    expect(progressVOs.length).toBe(7)
+
+    const stateVO =
+      progressVOs.length > 0 ? progressVOs[0].state : parseStatus("상품준비중")
+    const stateData = parseStatus("배달 완료")
+    expect(stateVO).toStrictEqual(stateData)
+
+    const fromVO = new DeliveryLocationVO({
+      name: $informations.eq(1).text(),
+      time:
+        progressVOs.length > 0 ? progressVOs[progressVOs.length - 1].time : ""
+    })
+    const fromData = new DeliveryLocationVO({
+      name: "광주지점",
+      time: "2024-04-03 --:--:--",
+      address: ""
+    })
+    expect(fromVO).toStrictEqual(fromData)
+
+    const toVO = new DeliveryLocationVO({
+      name: $informations.eq(2).text(),
+      time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
+    })
+    const toData = new DeliveryLocationVO({
+      name: "화성서부(대)",
+      time: "2024-04-06 14:44:00",
+      address: ""
+    })
+    expect(toVO).toStrictEqual(toData)
+
+    const deliveryDTO = new DeliveryDTO({
+      from: fromVO,
+      to: toVO,
+      progresses: progressVOs,
+      state: stateVO
+    })
+
+    // console.log(deliveryDTO)
+  })
+})
