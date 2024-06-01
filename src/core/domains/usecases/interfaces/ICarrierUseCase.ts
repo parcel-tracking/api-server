@@ -1,6 +1,6 @@
 import ICarrierDTO from "../../../dtos/interfaces/ICarrierDTO"
-import IErrorDTO from "../../../dtos/interfaces/IErrorDTO"
+import ILayerDTO from "../../../dtos/interfaces/ILayerDTO"
 
 export default interface ICarrierUseCase {
-  getCarriers(): Promise<ICarrierDTO[] | IErrorDTO>
+  getCarriers(): Promise<ILayerDTO<ICarrierDTO[]>>
 }

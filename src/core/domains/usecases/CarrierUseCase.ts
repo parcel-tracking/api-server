@@ -1,5 +1,7 @@
 import CarrierDTO from "../../dtos/CarrierDTO"
-import ErrorDTO from "../../dtos/ErrorDTO"
+import LayerDTO from "../../dtos/LayerDTO"
+import ICarrierDTO from "../../dtos/interfaces/ICarrierDTO"
+import ILayerDTO from "../../dtos/interfaces/ILayerDTO"
 import ICarrierRepository from "../../repositories/interfaces/ICarrierRepository"
 import ICarrierUseCase from "./interfaces/ICarrierUseCase"
 
@@ -10,21 +12,41 @@ export default class CarrierUseCase implements ICarrierUseCase {
     this.carrierRepository = carrierRepository
   }
 
-  async getCarriers() {
+  async getCarriers(): Promise<ILayerDTO<ICarrierDTO[]>> {
     if (typeof this.carrierRepository.getCarriers === "undefined") {
-      return new ErrorDTO("the wrong approach..")
+      return new LayerDTO({
+        isError: true,
+        message: "the wrong approach.."
+      })
     }
-    const carriers = await this.carrierRepository.getCarriers()
+
+    const {
+      isError,
+      message,
+      data: carriers
+    } = await this.carrierRepository.getCarriers()
+
+    if (isError) {
+      return new LayerDTO({
+        isError,
+        message
+      })
+    }
+
     const carrierDTOs = carriers.map((entitiy) => {
-      return new CarrierDTO(
-        entitiy.no,
-        entitiy.name,
-        entitiy.displayName,
-        entitiy.isCrawlable,
-        entitiy.isPopupEnabled,
-        entitiy.popupURL
-      )
+      return new CarrierDTO({
+        id: entitiy.id,
+        no: entitiy.no,
+        name: entitiy.name,
+        displayName: entitiy.displayName,
+        isCrawlable: entitiy.isCrawlable,
+        isPopupEnabled: entitiy.isPopupEnabled,
+        popupURL: entitiy.popupURL
+      })
     })
-    return carrierDTOs
+
+    return new LayerDTO({
+      data: carrierDTOs
+    })
   }
 }

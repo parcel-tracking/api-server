@@ -1,4 +1,5 @@
 export default interface ICarrier {
+  readonly id: string
   readonly no: number
   readonly name: string
   readonly displayName: string

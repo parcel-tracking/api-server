@@ -1,5 +1,3 @@
-import ICarrier from "./ICarrier"
-
 export default interface ITracker {
   readonly id: string
   carrierId: string

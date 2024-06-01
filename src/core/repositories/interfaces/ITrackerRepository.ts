@@ -1,14 +1,14 @@
 import ITracker from "../../domains/entities/interfaces/ITracker"
 import IDeliveryDTO from "../../dtos/interfaces/IDeliveryDTO"
-import IErrorDTO from "../../dtos/interfaces/IErrorDTO"
+import ILayerDTO from "../../dtos/interfaces/ILayerDTO"
 
 export default interface ITrackerRepository {
   getDelivery?(
     carrierId: string,
     trackingNumber: string
-  ): Promise<IDeliveryDTO | IErrorDTO>
-  getTrackers?(): Promise<ITracker[]>
-  addTracker?(tracker: ITracker): Promise<boolean>
-  updateTracker?(tracker: ITracker): Promise<boolean>
-  deleteTracker?(trackerId: string): Promise<boolean>
+  ): Promise<ILayerDTO<IDeliveryDTO>>
+  getTrackers?(): Promise<ILayerDTO<ITracker[]>>
+  addTracker?(tracker: ITracker): Promise<ILayerDTO<boolean>>
+  updateTracker?(tracker: ITracker): Promise<ILayerDTO<boolean>>
+  deleteTracker?(trackerId: string): Promise<ILayerDTO<boolean>>
 }
