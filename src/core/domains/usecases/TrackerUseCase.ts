@@ -3,6 +3,7 @@ import TrackerDTO from "../../dtos/TrackerDTO"
 import IDeliveryDTO from "../../dtos/interfaces/IDeliveryDTO"
 import ILayerDTO from "../../dtos/interfaces/ILayerDTO"
 import ITrackerDTO from "../../dtos/interfaces/ITrackerDTO"
+import ICarrierRepository from "../../repositories/interfaces/ICarrierRepository"
 import ITrackerRepository from "../../repositories/interfaces/ITrackerRepository"
 import Tracker from "../entities/Tracker"
 import ITracker from "../entities/interfaces/ITracker"
@@ -10,9 +11,14 @@ import ITrackerUseCase from "./interfaces/ITrackerUseCase"
 
 export default class TrackerUseCase implements ITrackerUseCase {
   private trackerRepository: ITrackerRepository
+  private carrierRepository: ICarrierRepository
 
-  constructor(trackerRepository: ITrackerRepository) {
+  constructor(
+    trackerRepository: ITrackerRepository,
+    carrierRepository: ICarrierRepository
+  ) {
     this.trackerRepository = trackerRepository
+    this.carrierRepository = carrierRepository
   }
 
   async getDelivery(
@@ -25,8 +31,15 @@ export default class TrackerUseCase implements ITrackerUseCase {
         message: "the wrong approach.."
       })
     }
-
-    return this.trackerRepository.getDelivery(carrierId, trackingNumber)
+    const {
+      isError,
+      message,
+      data: carrier
+    } = await this.carrierRepository.getCarrier(carrierId)
+    if (isError) {
+      return new LayerDTO({ isError, message })
+    }
+    return this.trackerRepository.getDelivery(carrier, trackingNumber)
   }
 
   async addTracker(): Promise<ILayerDTO<boolean>> {
