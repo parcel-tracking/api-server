@@ -1,4 +1,6 @@
 import axios from "axios"
+import * as cheerio from "cheerio"
+import * as iconv from "iconv-lite"
 import DeliveryDTO from "../../../core/dtos/DeliveryDTO"
 import DeliveryLocationVO from "../../../core/vos/DeliveryLocationVO"
 import IDeliveryDTO from "../../../core/dtos/interfaces/IDeliveryDTO"
@@ -6,17 +8,25 @@ import DeliveryStateGenerator from "../helpers/DeliveryStateGenerator"
 import ILayerDTO from "../../../core/dtos/interfaces/ILayerDTO"
 import LayerDTO from "../../../core/dtos/LayerDTO"
 import DeliveryProgressVO from "../../../core/vos/DeliveryProgressVO"
+import StringHelper from "../helpers/StringHelper"
 import ICrawler from "./interfaces/ICrawler"
 
-export default class KDExpCrawler implements ICrawler {
+export default class LogenCrawler implements ICrawler {
   getTrack(trackingNumber: string): Promise<ILayerDTO<IDeliveryDTO>> {
     return new Promise((resolve) => {
       axios
-        .post(
-          `https://kdexp.com/service/delivery/ajax_basic.do?barcode=${trackingNumber}`
-        )
+        .get(`https://www.ilogen.com/web/personal/trace/${trackingNumber}`, {
+          responseType: "arraybuffer"
+        })
         .then((res) => {
-          if (res.data.result !== "suc") {
+          const $ = cheerio.load(res.data)
+          const $content = $(".tab_contents")
+
+          const $informationTable = $content.find("table")
+          const $progressTable = $content.find("table").eq(1)
+          const $informations = $informationTable.find("tbody")
+
+          if ($progressTable.length === 0) {
             resolve(
               new LayerDTO({
                 isError: true,
@@ -25,25 +35,36 @@ export default class KDExpCrawler implements ICrawler {
             )
           }
 
-          const informationTable = res.data.info
-          const progressTable = res.data.items
-
-          const progressVOs = progressTable
-            .map((row) => {
-              return new DeliveryProgressVO({
-                description: `연락처: ${row.tel}`,
-                location: row.location,
-                time: this.parseDateTime(row.reg_date),
-                state: this.parseStatus(row.stat)
-              })
+          const progressVOs = []
+          $progressTable
+            .find("tbody")
+            .find("tr")
+            .each((_, element) => {
+              const td = $(element).find("td")
+              const description = StringHelper.trim(td.eq(3).text())
+              const location = StringHelper.trim(td.eq(1).text())
+              const time = this.parseDateTime(td.eq(0).text())
+              const state = this.parseStatus(td.eq(2).text())
+              progressVOs.push(
+                new DeliveryProgressVO({
+                  description,
+                  location,
+                  time,
+                  state
+                })
+              )
             })
-            .reverse()
+          progressVOs.reverse()
 
           const stateVO =
-            progressVOs.length > 0 ? progressVOs[0].state : this.parseStatus()
+            progressVOs.length > 0 && progressVOs[0].state.name === "배달완료"
+              ? progressVOs[0].state
+              : this.parseStatus()
 
           const fromVO = new DeliveryLocationVO({
-            name: this.parseLocationName(informationTable.send_name),
+            name: this.parseLocationName(
+              $informations.find("tr").eq(3).find("td").eq(1).text()
+            ),
             time:
               progressVOs.length > 0
                 ? progressVOs[progressVOs.length - 1].time
@@ -51,7 +72,9 @@ export default class KDExpCrawler implements ICrawler {
           })
 
           const toVO = new DeliveryLocationVO({
-            name: this.parseLocationName(informationTable.re_name),
+            name: this.parseLocationName(
+              $informations.find("tr").eq(3).find("td").eq(3).text()
+            ),
             time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
           })
 
@@ -84,13 +107,13 @@ export default class KDExpCrawler implements ICrawler {
     return short + (short.includes("*") ? "" : "*")
   }
 
-  private parseDateTime(value: string) {
-    return value.split(".")[0]
+  private parseDateTime(value: string = "") {
+    return StringHelper.trim(value + ":00")
   }
 
   private parseStatus(value?: string) {
-    if (value.includes("접수완료")) {
-      return DeliveryStateGenerator.getState("상품인수")
+    if (value.includes("배송출고")) {
+      return DeliveryStateGenerator.getState("배달출발")
     }
     if (value.includes("배송완료")) {
       return DeliveryStateGenerator.getState("배달완료")

@@ -70,7 +70,7 @@ export default class HanjinCrawler implements ICrawler {
               : this.parseStatus("상품준비중")
 
           const fromVO = new DeliveryLocationVO({
-            name: $informations.eq(1).text(),
+            name: this.parseLocationName($informations.eq(1).text()),
             time:
               progressVOs.length > 0
                 ? progressVOs[progressVOs.length - 1].time
@@ -78,7 +78,7 @@ export default class HanjinCrawler implements ICrawler {
           })
 
           const toVO = new DeliveryLocationVO({
-            name: $informations.eq(2).text(),
+            name: this.parseLocationName($informations.eq(2).text()),
             time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
           })
 
@@ -104,6 +104,11 @@ export default class HanjinCrawler implements ICrawler {
           )
         })
     })
+  }
+
+  private parseLocationName(value: string) {
+    const short = value.substring(0, 4)
+    return short + (short.includes("*") ? "" : "*")
   }
 
   private parseDateTime(date: string, time: string) {

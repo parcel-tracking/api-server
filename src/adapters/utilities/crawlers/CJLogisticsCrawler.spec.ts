@@ -4,24 +4,29 @@ import DeliveryStateGenerator from "../helpers/DeliveryStateGenerator"
 import DeliveryDTO from "../../../core/dtos/DeliveryDTO"
 import CJLogisticsMock from "./CJLogisticsMock"
 
+const parseStatus = (value?: string) => {
+  if (["41", "42", "44"].includes(value)) {
+    return DeliveryStateGenerator.getState("상품이동중")
+  }
+  if (value === "11") {
+    return DeliveryStateGenerator.getState("상품인수")
+  }
+  if (value === "82") {
+    return DeliveryStateGenerator.getState("배달출발")
+  }
+  if (value === "91") {
+    return DeliveryStateGenerator.getState("배달완료")
+  }
+  return DeliveryStateGenerator.getState("상품준비중")
+}
+
+const parseLocationName = (value: string) => {
+  const short = value.substring(0, 4)
+  return short + (short.includes("*") ? "" : "*")
+}
+
 describe("CJLogisticsCrawler", () => {
   it("should fetch and parse tracking information", async () => {
-    const parseStatus = (value?: string) => {
-      if (["41", "42", "44"].includes(value)) {
-        return DeliveryStateGenerator.getState("상품이동중")
-      }
-      if (value === "11") {
-        return DeliveryStateGenerator.getState("상품인수")
-      }
-      if (value === "82") {
-        return DeliveryStateGenerator.getState("배달출발")
-      }
-      if (value === "91") {
-        return DeliveryStateGenerator.getState("배달완료")
-      }
-      return DeliveryStateGenerator.getState("상품준비중")
-    }
-
     const res = {
       data: CJLogisticsMock
     }
@@ -44,24 +49,22 @@ describe("CJLogisticsCrawler", () => {
       progressVOs.length > 0 ? progressVOs[0].state : parseStatus()
 
     const fromVO = new DeliveryLocationVO({
-      name: informationTable[0].sendrNm,
+      name: parseLocationName(informationTable[0].sendrNm),
       time: progressTable.length > 0 ? progressTable[0].dTime : ""
     })
     const fromData = new DeliveryLocationVO({
       name: "코**",
-      time: "2024-04-08 18:15:11",
-      address: ""
+      time: "2024-04-08 18:15:11"
     })
     expect(fromVO).toStrictEqual(fromData)
 
     const toVO = new DeliveryLocationVO({
-      name: informationTable[0].rcvrNm,
+      name: parseLocationName(informationTable[0].rcvrNm),
       time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
     })
     const toData = new DeliveryLocationVO({
       name: "이**",
-      time: "2024-04-11 17:17:04",
-      address: ""
+      time: "2024-04-11 17:17:04"
     })
     expect(toVO).toStrictEqual(toData)
 

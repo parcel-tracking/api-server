@@ -33,14 +33,6 @@ export default class EPostCrawler implements ICrawler {
             )
           }
 
-          const from = decode($informations.eq(0).html()).split("<br>")
-          const to = decode($informations.eq(1).html()).split("<br>")
-
-          const fromVO = new DeliveryLocationVO({
-            name: from[0],
-            time: this.parseDateTime(from[1])
-          })
-
           const progressVOs = []
           $progressTable
             .find("tbody")
@@ -72,8 +64,15 @@ export default class EPostCrawler implements ICrawler {
               ? progressVOs[0].state
               : this.parseStatus("상품준비중")
 
+          const from = decode($informations.eq(0).html()).split("<br>")
+          const fromVO = new DeliveryLocationVO({
+            name: this.parseLocationName(from[0]),
+            time: this.parseDateTime(from[1])
+          })
+
+          const to = decode($informations.eq(1).html()).split("<br>")
           const toVO = new DeliveryLocationVO({
-            name: to[0],
+            name: this.parseLocationName(to[0]),
             time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
           })
 
@@ -99,6 +98,11 @@ export default class EPostCrawler implements ICrawler {
           )
         })
     })
+  }
+
+  private parseLocationName(value: string) {
+    const short = value.substring(0, 4)
+    return short + (short.includes("*") ? "" : "*")
   }
 
   private parseDateTime(value: string) {

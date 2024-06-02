@@ -5,6 +5,7 @@ import DaesinCrawler from "./crawlers/DaesinCrawler"
 import EPostCrawler from "./crawlers/EPostCrawler"
 import HanjinCrawler from "./crawlers/HanjinCrawler"
 import KDExpCrawler from "./crawlers/KDexpCrawler"
+import LogenCrawler from "./crawlers/LogenCrawler"
 import LotteCrawler from "./crawlers/LotteCrawler"
 
 export default class CrawlerUtility {
@@ -25,6 +26,8 @@ export default class CrawlerUtility {
         return new KDExpCrawler().getTrack(trackingNumber)
       case "daesin":
         return new DaesinCrawler().getTrack(trackingNumber)
+      case "logen":
+        return new LogenCrawler().getTrack(trackingNumber)
     }
   }
 }

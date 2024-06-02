@@ -6,29 +6,33 @@ import DeliveryStateGenerator from "../helpers/DeliveryStateGenerator"
 import DeliveryDTO from "../../../core/dtos/DeliveryDTO"
 import LotteMockHTML from "./LotteMockHTML"
 
+const parseStatus = (value: string) => {
+  if (value.includes("상품접수")) {
+    return DeliveryStateGenerator.getState("상품인수")
+  }
+  if (value.includes("배송 출발")) {
+    return DeliveryStateGenerator.getState("배달출발")
+  }
+  if (value.includes("배달 완료")) {
+    return DeliveryStateGenerator.getState("배달완료")
+  }
+  return DeliveryStateGenerator.getState("상품이동중")
+}
+
+const parseDateTime = (value: string) => {
+  const dateTime = value.split("&nbsp;")
+  const date = dateTime[0]
+  const time =
+    dateTime[1] === "--:--" ? dateTime[1] + ":--" : dateTime[1] + ":00"
+  return date + " " + time
+}
+
+const parseLocationName = (value: string) => {
+  return value
+}
+
 describe("LotteCrawler", () => {
   it("should fetch and parse tracking information", async () => {
-    const parseStatus = (value: string) => {
-      if (value.includes("상품접수")) {
-        return DeliveryStateGenerator.getState("상품인수")
-      }
-      if (value.includes("배송 출발")) {
-        return DeliveryStateGenerator.getState("배달출발")
-      }
-      if (value.includes("배달 완료")) {
-        return DeliveryStateGenerator.getState("배달완료")
-      }
-      return DeliveryStateGenerator.getState("상품이동중")
-    }
-
-    const parseDateTime = (value: string) => {
-      const dateTime = value.split("&nbsp;")
-      const date = dateTime[0]
-      const time =
-        dateTime[1] === "--:--" ? dateTime[1] + ":--" : dateTime[1] + ":00"
-      return date + " " + time
-    }
-
     const $ = cheerio.load(LotteMockHTML)
     const $informationTable = $("table").eq(0)
     const $progressTable = $("table").eq(1)
@@ -61,25 +65,23 @@ describe("LotteCrawler", () => {
     expect(stateVO).toStrictEqual(stateData)
 
     const fromVO = new DeliveryLocationVO({
-      name: $informations.eq(1).text(),
+      name: parseLocationName($informations.eq(1).text()),
       time:
         progressVOs.length > 0 ? progressVOs[progressVOs.length - 1].time : ""
     })
     const fromData = new DeliveryLocationVO({
       name: "광주지점",
-      time: "2024-04-03 --:--:--",
-      address: ""
+      time: "2024-04-03 --:--:--"
     })
     expect(fromVO).toStrictEqual(fromData)
 
     const toVO = new DeliveryLocationVO({
-      name: $informations.eq(2).text(),
+      name: parseLocationName($informations.eq(2).text()),
       time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
     })
     const toData = new DeliveryLocationVO({
       name: "화성서부(대)",
-      time: "2024-04-06 14:44:00",
-      address: ""
+      time: "2024-04-06 14:44:00"
     })
     expect(toVO).toStrictEqual(toData)
 

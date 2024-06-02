@@ -7,7 +7,7 @@ export default {
     cnt: 1,
     re_name: "우****",
     rec_dt: "2024-02-29 14:41:43",
-    barcode: "2008090941228",
+    barcode: "123",
     branch_start: "서울금천가산687",
     relation: "문앞"
   },

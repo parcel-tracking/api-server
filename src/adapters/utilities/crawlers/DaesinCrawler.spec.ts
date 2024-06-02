@@ -1,5 +1,4 @@
 import * as cheerio from "cheerio"
-import { decode } from "html-entities"
 import DeliveryLocationVO from "../../../core/vos/DeliveryLocationVO"
 import DeliveryProgressVO from "../../../core/vos/DeliveryProgressVO"
 import StringHelper from "../helpers/StringHelper"
@@ -7,19 +6,24 @@ import DeliveryStateGenerator from "../helpers/DeliveryStateGenerator"
 import DeliveryDTO from "../../../core/dtos/DeliveryDTO"
 import DaesinMockHTML from "./DaesinMockHTML"
 
+const parseStatus = (value: string = "") => {
+  if (value.includes("배송완료")) {
+    return DeliveryStateGenerator.getState("배달완료")
+  }
+  return DeliveryStateGenerator.getState("상품이동중")
+}
+
+const parseDateTime = (value: string) => {
+  return StringHelper.trim(value + ":00")
+}
+
+const parseLocationName = (value: string) => {
+  const short = value.substring(0, 4)
+  return short + (short.includes("*") ? "" : "*")
+}
+
 describe("DaesinCrawler", () => {
   it("should fetch and parse tracking information", async () => {
-    const parseStatus = (value: string = "") => {
-      if (value.includes("배송완료")) {
-        return DeliveryStateGenerator.getState("배달완료")
-      }
-      return DeliveryStateGenerator.getState("상품이동중")
-    }
-
-    const parseDateTime = (value: string) => {
-      return StringHelper.trim(value + ":00")
-    }
-
     const $ = cheerio.load(DaesinMockHTML)
     const $content = $("#content")
 
@@ -59,19 +63,23 @@ describe("DaesinCrawler", () => {
     expect(stateVO).toStrictEqual(stateData)
 
     const fromVO = new DeliveryLocationVO({
-      name: $informations.find("tr").eq(0).find("td").eq(0).text(),
+      name: parseLocationName(
+        $informations.find("tr").eq(0).find("td").eq(0).text()
+      ),
       time:
         progressVOs.length > 0 ? progressVOs[progressVOs.length - 1].time : ""
     })
     const fromData = new DeliveryLocationVO({
-      name: "바****",
+      name: "바***",
       time: "2024-02-27 09:58:00",
       address: ""
     })
     expect(fromVO).toStrictEqual(fromData)
 
     const toVO = new DeliveryLocationVO({
-      name: $informations.find("tr").eq(1).find("td").eq(0).text(),
+      name: parseLocationName(
+        $informations.find("tr").eq(1).find("td").eq(0).text()
+      ),
       time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
     })
     const toData = new DeliveryLocationVO({
@@ -88,6 +96,6 @@ describe("DaesinCrawler", () => {
       state: stateVO
     })
 
-    console.log(deliveryDTO)
+    // console.log(deliveryDTO)
   })
 })

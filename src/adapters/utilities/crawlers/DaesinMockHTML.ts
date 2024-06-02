@@ -17,7 +17,7 @@ export default `<div id="content"><p class="box04">운송장 번호  : 123</p>
         </tr>
         <tr>
                 <th>품 명</th>
-                <td>자전거후토셋</td>
+                <td>테스트 아이템</td>
                 <th>수 량</th>
                 <td>1 EA</td>
         </tr>                  

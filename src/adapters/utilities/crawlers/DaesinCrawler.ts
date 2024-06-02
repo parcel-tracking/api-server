@@ -74,7 +74,9 @@ export default class DaesinCrawler implements ICrawler {
               : this.parseStatus()
 
           const fromVO = new DeliveryLocationVO({
-            name: $informations.find("tr").eq(0).find("td").eq(0).text(),
+            name: this.parseLocationName(
+              $informations.find("tr").eq(0).find("td").eq(0).text()
+            ),
             time:
               progressVOs.length > 0
                 ? progressVOs[progressVOs.length - 1].time
@@ -82,7 +84,9 @@ export default class DaesinCrawler implements ICrawler {
           })
 
           const toVO = new DeliveryLocationVO({
-            name: $informations.find("tr").eq(1).find("td").eq(0).text(),
+            name: this.parseLocationName(
+              $informations.find("tr").eq(1).find("td").eq(0).text()
+            ),
             time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
           })
 
@@ -108,6 +112,11 @@ export default class DaesinCrawler implements ICrawler {
           )
         })
     })
+  }
+
+  private parseLocationName(value: string) {
+    const short = value.substring(0, 4)
+    return short + (short.includes("*") ? "" : "*")
   }
 
   private parseDateTime(value: string = "") {

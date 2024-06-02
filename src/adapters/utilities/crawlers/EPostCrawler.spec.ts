@@ -7,45 +7,36 @@ import StringHelper from "../helpers/StringHelper"
 import DeliveryStateGenerator from "../helpers/DeliveryStateGenerator"
 import DeliveryDTO from "../../../core/dtos/DeliveryDTO"
 
+const parseStatus = (value: string) => {
+  if (value.includes("접수")) {
+    return DeliveryStateGenerator.getState("상품인수")
+  }
+  if (value.includes("배달준비")) {
+    return DeliveryStateGenerator.getState("배달출발")
+  }
+  if (value.includes("배달완료")) {
+    return DeliveryStateGenerator.getState("배달완료")
+  }
+  return DeliveryStateGenerator.getState("상품이동중")
+}
+
+const parseDateTime = (value: string) => {
+  const dateTime = value.split(" ")
+  const time = dateTime.length > 1 ? " " + dateTime[1] + ":00" : ""
+  return dateTime[0].replace(/\./g, "-") + time
+}
+
+const parseLocationName = (value: string) => {
+  const short = value.substring(0, 4)
+  return short + (short.includes("*") ? "" : "*")
+}
+
 describe("EPostCrawler", () => {
   it("should fetch and parse tracking information", async () => {
-    const parseStatus = (value: string) => {
-      if (value.includes("접수")) {
-        return DeliveryStateGenerator.getState("상품인수")
-      }
-      if (value.includes("배달준비")) {
-        return DeliveryStateGenerator.getState("배달출발")
-      }
-      if (value.includes("배달완료")) {
-        return DeliveryStateGenerator.getState("배달완료")
-      }
-      return DeliveryStateGenerator.getState("상품이동중")
-    }
-
-    const parseDateTime = (value: string) => {
-      const dateTime = value.split(" ")
-      const time = dateTime.length > 1 ? " " + dateTime[1] + ":00" : ""
-      return dateTime[0].replace(/\./g, "-") + time
-    }
-
     const $ = cheerio.load(EPostMockHTML)
     const $informationTable = $("#print").find("table")
     const $progressTable = $("#processTable")
     const $informations = $informationTable.find("td")
-
-    const from = decode($informations.eq(0).html()).split("<br>")
-    const to = decode($informations.eq(1).html()).split("<br>")
-
-    const fromVO = new DeliveryLocationVO({
-      name: from[0],
-      time: parseDateTime(from[1])
-    })
-    const fromData = new DeliveryLocationVO({
-      name: "테스트익스프레스",
-      time: "2024-03-15",
-      address: ""
-    })
-    expect(fromVO).toStrictEqual(fromData)
 
     const progressVOs = []
     $progressTable
@@ -74,20 +65,30 @@ describe("EPostCrawler", () => {
 
     const stateVO =
       progressVOs.length > 0 ? progressVOs[0].state : parseStatus("상품준비중")
+    const stateData = parseStatus("배달완료")
+    expect(stateVO).toStrictEqual(stateData)
 
+    const to = decode($informations.eq(1).html()).split("<br>")
     const toVO = new DeliveryLocationVO({
-      name: to[0],
+      name: parseLocationName(to[0]),
       time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
     })
     const toData = new DeliveryLocationVO({
       name: "테*트",
-      time: "2024-03-18 12:12:00",
-      address: ""
+      time: "2024-03-18 12:12:00"
     })
     expect(toVO).toStrictEqual(toData)
 
-    const stateData = parseStatus("배달완료")
-    expect(stateVO).toStrictEqual(stateData)
+    const from = decode($informations.eq(0).html()).split("<br>")
+    const fromVO = new DeliveryLocationVO({
+      name: parseLocationName(from[0]),
+      time: parseDateTime(from[1])
+    })
+    const fromData = new DeliveryLocationVO({
+      name: "테스트익*",
+      time: "2024-03-15"
+    })
+    expect(fromVO).toStrictEqual(fromData)
 
     const deliveryDTO = new DeliveryDTO({
       from: fromVO,

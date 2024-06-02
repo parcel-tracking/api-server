@@ -35,6 +35,7 @@ export default class CJLogisticsCrawler implements ICrawler {
           }
         )
         .then((res) => {
+          console.log(res.data)
           const informationTable = res.data.parcelResultMap.resultList
           const progressTable = res.data.parcelDetailResultMap.resultList
 
@@ -62,12 +63,12 @@ export default class CJLogisticsCrawler implements ICrawler {
             progressVOs.length > 0 ? progressVOs[0].state : this.parseStatus()
 
           const fromVO = new DeliveryLocationVO({
-            name: informationTable[0].sendrNm,
+            name: this.parseLocationName(informationTable[0].sendrNm),
             time: progressTable.length > 0 ? progressTable[0].dTime : ""
           })
 
           const toVO = new DeliveryLocationVO({
-            name: informationTable[0].rcvrNm,
+            name: this.parseLocationName(informationTable[0].rcvrNm),
             time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
           })
 
@@ -93,6 +94,11 @@ export default class CJLogisticsCrawler implements ICrawler {
           )
         })
     })
+  }
+
+  private parseLocationName(value: string) {
+    const short = value.substring(0, 4)
+    return short + (short.includes("*") ? "" : "*")
   }
 
   private parseStatus(value?: string) {

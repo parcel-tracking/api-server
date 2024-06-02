@@ -2,11 +2,10 @@ export default {
   parcelResultMap: {
     resultList: [
       {
-        invcNo: "684492055223",
+        invcNo: "123",
         sendrNm: "코**",
         qty: "1",
-        itemNm:
-          "[당일배송/국산수제] 3cm,5cm,7cm 브이컷 스틸레토 뮬 블로퍼 225mm~255mm",
+        itemNm: "테스트 아이템",
         rcvrNm: "이**",
         rgmailNo: "",
         oriTrspbillnum: "",
@@ -14,7 +13,7 @@ export default {
         nsDlvNm: "91"
       }
     ],
-    paramInvcNo: "684492055223"
+    paramInvcNo: "123"
   },
   parcelDetailResultMap: {
     resultList: [
@@ -60,8 +59,7 @@ export default {
       },
       {
         nsDlvNm: "",
-        crgNm:
-          "고객님의 상품이 배송지에 도착하였습니다.(배송예정:권승대 010-2633-6560)",
+        crgNm: "고객님의 상품이 배송지에 도착하였습니다.(배송담당:테스트)",
         crgSt: "42",
         dTime: "2024-04-09 11:39:04",
         empImgNm: "EMP_IMG_NM",
@@ -71,8 +69,7 @@ export default {
       },
       {
         nsDlvNm: "",
-        crgNm:
-          "고객님의 상품을 배송할 예정입니다.(16~18시)(배송담당:권승대 010-2633-6560)",
+        crgNm: "고객님의 상품을 배송할 예정입니다.(16~18시)(배송담당:테스트)",
         crgSt: "82",
         dTime: "2024-04-11 12:19:45",
         empImgNm: "592708",
@@ -82,8 +79,7 @@ export default {
       },
       {
         nsDlvNm: "",
-        crgNm:
-          "고객님의 상품이 배송완료 되었습니다.(담당사원:권승대 010-2633-6560)",
+        crgNm: "고객님의 상품이 배송완료 되었습니다.(담당사원:테스트)",
         crgSt: "91",
         dTime: "2024-04-11 17:17:04",
         empImgNm: "EMP_IMG_NM",
@@ -92,6 +88,6 @@ export default {
         scanNm: "배송완료"
       }
     ],
-    paramInvcNo: "684492055223"
+    paramInvcNo: "123"
   }
 }
