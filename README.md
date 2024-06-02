@@ -1,1 +1,1 @@
-# Delivery Tracking fo Whale - API Server
+# Delivery Tracking for Whale - API Server
