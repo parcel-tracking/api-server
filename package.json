@@ -2,8 +2,8 @@
   "name": "api-server",
   "version": "0.0.1",
   "description": "",
-  "author": "",
   "private": true,
+  "author": "falsy",
   "license": "WTFPL license",
   "scripts": {
     "build": "nest build",
