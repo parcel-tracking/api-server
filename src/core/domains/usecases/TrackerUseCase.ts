@@ -5,7 +5,6 @@ import ILayerDTO from "../../dtos/interfaces/ILayerDTO"
 import ITrackerDTO from "../../dtos/interfaces/ITrackerDTO"
 import ICarrierRepository from "../../repositories/interfaces/ICarrierRepository"
 import ITrackerRepository from "../../repositories/interfaces/ITrackerRepository"
-import Tracker from "../entities/Tracker"
 import ITracker from "../entities/interfaces/ITracker"
 import ITrackerUseCase from "./interfaces/ITrackerUseCase"
 
@@ -42,7 +41,7 @@ export default class TrackerUseCase implements ITrackerUseCase {
     return this.trackerRepository.getDelivery(carrier, trackingNumber)
   }
 
-  async addTracker(): Promise<ILayerDTO<boolean>> {
+  async addTracker(newTracker: ITracker): Promise<ILayerDTO<boolean>> {
     if (typeof this.trackerRepository.addTracker === "undefined") {
       return new LayerDTO({
         isError: true,
@@ -50,7 +49,6 @@ export default class TrackerUseCase implements ITrackerUseCase {
       })
     }
 
-    const newTracker = new Tracker()
     return this.trackerRepository.addTracker(newTracker)
   }
 
