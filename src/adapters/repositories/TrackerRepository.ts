@@ -9,6 +9,7 @@ export default class TrackerRepository implements ITrackerRepository {
     carrier: ICarrier,
     trackingNumber: string
   ): Promise<ILayerDTO<IDeliveryDTO>> {
-    return CrawlerUtility.getTrack(carrier.name, trackingNumber)
+    const { name } = carrier
+    return CrawlerUtility.getTrack(name, trackingNumber)
   }
 }
