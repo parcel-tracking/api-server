@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common"
+import { InjectModel } from "@nestjs/sequelize"
 import CarrierRepository from "../../adapters/repositories/CarrierRepository"
 import CarrierModel from "../models/CarrierModel"
-import { InjectModel } from "@nestjs/sequelize"
-import Carrier from "../../core/domains/entities/Carrier"
-import ICarrier from "../../core/domains/entities/interfaces/ICarrier"
 import ILayerDTO from "../../core/dtos/interfaces/ILayerDTO"
 import LayerDTO from "../../core/dtos/LayerDTO"
+import CarrierDTO from "../../core/dtos/CarrierDTO"
+import ICarrierDTO from "../../core/dtos/interfaces/ICarrierDTO"
 
 @Injectable()
 export default class NCarrierRepository extends CarrierRepository {
@@ -16,10 +16,10 @@ export default class NCarrierRepository extends CarrierRepository {
     super()
   }
 
-  async getCarriers(): Promise<ILayerDTO<ICarrier[]>> {
+  async getCarriers(): Promise<ILayerDTO<ICarrierDTO[]>> {
     const carrierModels = await this.carrierModel.findAll()
     const carriers = carrierModels.map((model) => {
-      return new Carrier({
+      return new CarrierDTO({
         id: model.uid,
         no: model.no,
         name: model.name,
@@ -35,11 +35,11 @@ export default class NCarrierRepository extends CarrierRepository {
     })
   }
 
-  async getCarrier(carrierId: string): Promise<ILayerDTO<ICarrier>> {
+  async getCarrier(carrierId: string): Promise<ILayerDTO<ICarrierDTO>> {
     const carrierModel = await this.carrierModel.findOne({
       where: { uid: carrierId }
     })
-    const carrier = new Carrier({
+    const carrier = new CarrierDTO({
       id: carrierModel.uid,
       no: carrierModel.no,
       name: carrierModel.name,
