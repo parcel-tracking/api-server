@@ -1,1 +1,1 @@
-# Parcel Tracking - Extension for Whale
+# Parcel Tracking - API Server
