@@ -1,4 +1,3 @@
-import axios from "axios"
 import * as cheerio from "cheerio"
 import { Cookie } from "tough-cookie"
 import DeliveryDTO from "../../../core/dtos/DeliveryDTO"
@@ -8,91 +7,109 @@ import DeliveryStateGenerator from "../helpers/DeliveryStateGenerator"
 import ILayerDTO from "../../../core/dtos/interfaces/ILayerDTO"
 import LayerDTO from "../../../core/dtos/LayerDTO"
 import DeliveryProgressVO from "../../../core/vos/DeliveryProgressVO"
+import IServerHTTP from "../../infrastructures/interfaces/IServerHTTP"
 import ICrawler from "./interfaces/ICrawler"
 
 export default class CJLogisticsCrawler implements ICrawler {
+  constructor(private readonly serverHTTP: IServerHTTP) {}
+
   getTrack(trackingNumber: string): Promise<ILayerDTO<IDeliveryDTO>> {
     return new Promise(async (resolve) => {
-      const tracikng = await axios.get(
+      const tracikng = await this.serverHTTP.get(
         "https://www.cjlogistics.com/ko/tool/parcel/tracking"
       )
-      const cookie = tracikng.headers["set-cookie"]
-        .map((c) => Cookie.parse(c))
-        .map((c) => c.cookieString())
-        .join("; ")
 
-      const $ = cheerio.load(tracikng.data)
+      if (tracikng.status !== 200) {
+        resolve(
+          new LayerDTO({
+            isError: true,
+            message: "운송장 조회에 실패하였습니다."
+          })
+        )
+        return
+      }
+
+      const cookie =
+        tracikng.headers
+          .get("set-cookie")
+          ?.split(",")
+          .map((c) => Cookie.parse(c))
+          .map((c) => c?.cookieString() ?? null)
+          .join("; ") ?? null
+
+      const $ = cheerio.load(await tracikng.text())
       const csrf = $("input[name=_csrf]").val()
 
-      axios
-        .post(
-          `https://www.cjlogistics.com/ko/tool/parcel/tracking-detail?paramInvcNo=${trackingNumber}&_csrf=${csrf}`,
-          {},
-          {
-            headers: {
-              Cookie: cookie
-            }
+      const trackingRes = await this.serverHTTP.post(
+        `https://www.cjlogistics.com/ko/tool/parcel/tracking-detail?paramInvcNo=${trackingNumber}&_csrf=${csrf}`,
+        {},
+        {
+          headers: {
+            Cookie: cookie
           }
+        }
+      )
+
+      if (trackingRes.status !== 200) {
+        resolve(
+          new LayerDTO({
+            isError: true,
+            message: "운송장 조회에 실패하였습니다."
+          })
         )
-        .then((res) => {
-          console.log(res.data)
-          const informationTable = res.data.parcelResultMap.resultList
-          const progressTable = res.data.parcelDetailResultMap.resultList
+        return
+      }
 
-          if (informationTable.length === 0) {
-            resolve(
-              new LayerDTO({
-                isError: true,
-                message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
-              })
-            )
-          }
+      const resData = await trackingRes.json()
+      const informationTable = resData.parcelResultMap.resultList
+      const progressTable = resData.parcelDetailResultMap.resultList
 
-          const progressVOs = progressTable
-            .map((row) => {
-              return new DeliveryProgressVO({
-                description: row.crgNm,
-                location: row.regBranNm,
-                time: row.dTime,
-                state: this.parseStatus(row.crgSt)
-              })
-            })
-            .reverse()
-
-          const stateVO =
-            progressVOs.length > 0 ? progressVOs[0].state : this.parseStatus()
-
-          const fromVO = new DeliveryLocationVO({
-            name: this.parseLocationName(informationTable[0].sendrNm),
-            time: progressTable.length > 0 ? progressTable[0].dTime : ""
+      if (informationTable.length === 0) {
+        resolve(
+          new LayerDTO({
+            isError: true,
+            message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
           })
+        )
+        return
+      }
 
-          const toVO = new DeliveryLocationVO({
-            name: this.parseLocationName(informationTable[0].rcvrNm),
-            time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
+      const progressVOs = progressTable
+        .map((row) => {
+          return new DeliveryProgressVO({
+            description: row.crgNm,
+            location: row.regBranNm,
+            time: row.dTime,
+            state: this.parseStatus(row.crgSt)
           })
-
-          const deliveryDTO = new DeliveryDTO({
-            from: fromVO,
-            to: toVO,
-            progresses: progressVOs,
-            state: stateVO
-          })
-
-          resolve(
-            new LayerDTO({
-              data: deliveryDTO
-            })
-          )
         })
-        .catch((err) => {
-          resolve(
-            new LayerDTO({
-              isError: true,
-              message: err.message
-            })
-          )
+        .reverse()
+
+      const stateVO =
+        progressVOs.length > 0 ? progressVOs[0].state : this.parseStatus()
+
+      const fromVO = new DeliveryLocationVO({
+        name: this.parseLocationName(informationTable[0].sendrNm),
+        time: progressTable.length > 0 ? progressTable[0].dTime : ""
+      })
+
+      const toVO = new DeliveryLocationVO({
+        name: this.parseLocationName(informationTable[0].rcvrNm),
+        time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
+      })
+
+      const deliveryDTO = new DeliveryDTO({
+        from: fromVO,
+        to: toVO,
+        progresses: progressVOs,
+        state: stateVO
+      })
+
+      resolve(
+        new LayerDTO({
+          data: deliveryDTO
         })
+      )
     })
   }
 
