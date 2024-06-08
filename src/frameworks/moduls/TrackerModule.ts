@@ -11,6 +11,10 @@ import NServerHTTP from "../infrastructures/NServerHTTP"
   imports: [SequelizeModule.forFeature([CarrierModel])],
   providers: [
     {
+      provide: "IHttpServer",
+      useValue: globalThis.fetch.bind(globalThis)
+    },
+    {
       provide: "IServerHTTP",
       useClass: NServerHTTP
     },

@@ -1,8 +1,15 @@
-import { Injectable } from "@nestjs/common"
+import { Inject, Injectable } from "@nestjs/common"
 import ServerHTTP from "../../adapters/infrastructures/ServerHTTP"
 
 @Injectable()
 export default class NServerHTTP extends ServerHTTP {
+  constructor(
+    @Inject("IHttpServer")
+    httpServer: (input: RequestInfo, init?: RequestInit) => Promise<Response>
+  ) {
+    super(httpServer)
+  }
+
   async get(url: string, options?: RequestInit): Promise<Response> {
     return super.get(url, options)
   }
