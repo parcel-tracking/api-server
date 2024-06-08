@@ -43,9 +43,33 @@ tough-cookie is licensed under the BSD-3-Clause license.
 For more information, see https://github.com/salesforce/tough-cookie/blob/master/LICENSE
 
 ### reflect-metadata
-tough-cookie is licensed under the Apache License 2.0.
+reflect-metadata is licensed under the Apache License 2.0.
 For more information, see https://github.com/rbuckton/reflect-metadata/blob/main/LICENSE
 
 ### rxjs
-tough-cookie is licensed under the Apache License 2.0.
+rxjs is licensed under the Apache License 2.0.
 For more information, see https://github.com/ReactiveX/rxjs/blob/master/LICENSE.txt
+
+### prettier
+prettier is licensed under the Apache License 2.0.
+For more information, see https://github.com/prettier/prettier/blob/main/LICENSE
+
+### source-map-support
+source-map-support is licensed under the Apache License 2.0.
+For more information, see https://github.com/evanw/node-source-map-support/blob/master/LICENSE.md
+
+### supertest
+supertest is licensed under the Apache License 2.0.
+For more information, see https://github.com/ladjs/supertest/blob/master/LICENSE
+
+### ts-jest
+ts-jest is licensed under the Apache License 2.0.
+For more information, see https://github.com/kulshekhar/ts-jest/blob/main/LICENSE.md
+
+### ts-loader
+ts-loader is licensed under the Apache License 2.0.
+For more information, see https://github.com/TypeStrong/ts-loader/blob/main/LICENSE
+
+### ts-node
+ts-node is licensed under the Apache License 2.0.
+For more information, see https://github.com/TypeStrong/ts-node/blob/main/LICENSE
