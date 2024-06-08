@@ -27,57 +27,68 @@ export default class KDExpCrawler implements ICrawler {
         return
       }
 
-      const resData = await trackingRes.json()
-      if (resData.result !== "suc") {
+      try {
+        const resData = await trackingRes.json()
+        if (resData.result !== "suc") {
+          resolve(
+            new LayerDTO({
+              isError: true,
+              message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
+            })
+          )
+          return
+        }
+
+        const informationTable = resData.info
+        const progressTable = resData.items
+
+        const progressVOs = progressTable
+          .map((row) => {
+            return new DeliveryProgressVO({
+              description: `연락처: ${row.tel}`,
+              location: row.location,
+              time: this.parseDateTime(row.reg_date),
+              state: this.parseStatus(row.stat)
+            })
+          })
+          .reverse()
+
+        const stateVO =
+          progressVOs.length > 0 ? progressVOs[0].state : this.parseStatus()
+
+        const fromVO = new DeliveryLocationVO({
+          name: this.parseLocationName(informationTable.send_name),
+          time:
+            progressVOs.length > 0
+              ? progressVOs[progressVOs.length - 1].time
+              : ""
+        })
+
+        const toVO = new DeliveryLocationVO({
+          name: this.parseLocationName(informationTable.re_name),
+          time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
+        })
+
+        const deliveryDTO = new DeliveryDTO({
+          from: fromVO,
+          to: toVO,
+          progresses: progressVOs,
+          state: stateVO
+        })
+
+        resolve(
+          new LayerDTO({
+            data: deliveryDTO
+          })
+        )
+      } catch (error) {
         resolve(
           new LayerDTO({
             isError: true,
-            message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
+            message: error.message
           })
         )
-        return
       }
-
-      const informationTable = resData.info
-      const progressTable = resData.items
-
-      const progressVOs = progressTable
-        .map((row) => {
-          return new DeliveryProgressVO({
-            description: `연락처: ${row.tel}`,
-            location: row.location,
-            time: this.parseDateTime(row.reg_date),
-            state: this.parseStatus(row.stat)
-          })
-        })
-        .reverse()
-
-      const stateVO =
-        progressVOs.length > 0 ? progressVOs[0].state : this.parseStatus()
-
-      const fromVO = new DeliveryLocationVO({
-        name: this.parseLocationName(informationTable.send_name),
-        time:
-          progressVOs.length > 0 ? progressVOs[progressVOs.length - 1].time : ""
-      })
-
-      const toVO = new DeliveryLocationVO({
-        name: this.parseLocationName(informationTable.re_name),
-        time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
-      })
-
-      const deliveryDTO = new DeliveryDTO({
-        from: fromVO,
-        to: toVO,
-        progresses: progressVOs,
-        state: stateVO
-      })
-
-      resolve(
-        new LayerDTO({
-          data: deliveryDTO
-        })
-      )
     })
   }
 

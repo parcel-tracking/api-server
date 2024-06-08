@@ -60,56 +60,65 @@ export default class CJLogisticsCrawler implements ICrawler {
         return
       }
 
-      const resData = await trackingRes.json()
-      const informationTable = resData.parcelResultMap.resultList
-      const progressTable = resData.parcelDetailResultMap.resultList
+      try {
+        const resData = await trackingRes.json()
+        const informationTable = resData.parcelResultMap.resultList
+        const progressTable = resData.parcelDetailResultMap.resultList
 
-      if (informationTable.length === 0) {
+        if (informationTable.length === 0) {
+          resolve(
+            new LayerDTO({
+              isError: true,
+              message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
+            })
+          )
+          return
+        }
+
+        const progressVOs = progressTable
+          .map((row) => {
+            return new DeliveryProgressVO({
+              description: row.crgNm,
+              location: row.regBranNm,
+              time: row.dTime,
+              state: this.parseStatus(row.crgSt)
+            })
+          })
+          .reverse()
+
+        const stateVO =
+          progressVOs.length > 0 ? progressVOs[0].state : this.parseStatus()
+
+        const fromVO = new DeliveryLocationVO({
+          name: this.parseLocationName(informationTable[0].sendrNm),
+          time: progressTable.length > 0 ? progressTable[0].dTime : ""
+        })
+
+        const toVO = new DeliveryLocationVO({
+          name: this.parseLocationName(informationTable[0].rcvrNm),
+          time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
+        })
+
+        const deliveryDTO = new DeliveryDTO({
+          from: fromVO,
+          to: toVO,
+          progresses: progressVOs,
+          state: stateVO
+        })
+
+        resolve(
+          new LayerDTO({
+            data: deliveryDTO
+          })
+        )
+      } catch (error) {
         resolve(
           new LayerDTO({
             isError: true,
-            message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
+            message: error.message
           })
         )
-        return
       }
-
-      const progressVOs = progressTable
-        .map((row) => {
-          return new DeliveryProgressVO({
-            description: row.crgNm,
-            location: row.regBranNm,
-            time: row.dTime,
-            state: this.parseStatus(row.crgSt)
-          })
-        })
-        .reverse()
-
-      const stateVO =
-        progressVOs.length > 0 ? progressVOs[0].state : this.parseStatus()
-
-      const fromVO = new DeliveryLocationVO({
-        name: this.parseLocationName(informationTable[0].sendrNm),
-        time: progressTable.length > 0 ? progressTable[0].dTime : ""
-      })
-
-      const toVO = new DeliveryLocationVO({
-        name: this.parseLocationName(informationTable[0].rcvrNm),
-        time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
-      })
-
-      const deliveryDTO = new DeliveryDTO({
-        from: fromVO,
-        to: toVO,
-        progresses: progressVOs,
-        state: stateVO
-      })
-
-      resolve(
-        new LayerDTO({
-          data: deliveryDTO
-        })
-      )
     })
   }
 

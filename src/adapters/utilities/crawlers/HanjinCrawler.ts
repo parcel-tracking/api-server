@@ -35,72 +35,83 @@ export default class HanjinCrawler implements ICrawler {
         return
       }
 
-      const resData = await trackingRes.text()
-      const $ = cheerio.load(resData)
-      const $wrap = $("#delivery-wr")
-      if ($wrap.length === 0) {
+      try {
+        const resData = await trackingRes.text()
+        const $ = cheerio.load(resData)
+        const $wrap = $("#delivery-wr")
+        if ($wrap.length === 0) {
+          resolve(
+            new LayerDTO({
+              isError: true,
+              message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
+            })
+          )
+          return
+        }
+
+        const $informationTable = $wrap.find(".delivery-tbl").find("tbody")
+        const $progressTable = $wrap.find(".waybill-tbl").find("table")
+        const $informations = $informationTable.find("td")
+
+        const progressVOs = []
+        $progressTable
+          .find("tbody")
+          .find("tr")
+          .each((_, element) => {
+            const td = $(element).find("td")
+            const description = StringHelper.trim(td.eq(3).text())
+            const location = StringHelper.trim(td.eq(2).text())
+            const time = this.parseDateTime(td.eq(0).text(), td.eq(1).text())
+            const state = this.parseStatus(td.eq(3).text())
+            progressVOs.push(
+              new DeliveryProgressVO({
+                description,
+                location,
+                time,
+                state
+              })
+            )
+          })
+        progressVOs.reverse()
+
+        const stateVO =
+          progressVOs.length > 0
+            ? progressVOs[0].state
+            : this.parseStatus("상품준비중")
+
+        const fromVO = new DeliveryLocationVO({
+          name: this.parseLocationName($informations.eq(1).text()),
+          time:
+            progressVOs.length > 0
+              ? progressVOs[progressVOs.length - 1].time
+              : ""
+        })
+
+        const toVO = new DeliveryLocationVO({
+          name: this.parseLocationName($informations.eq(2).text()),
+          time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
+        })
+
+        const deliveryDTO = new DeliveryDTO({
+          from: fromVO,
+          to: toVO,
+          progresses: progressVOs,
+          state: stateVO
+        })
+
+        resolve(
+          new LayerDTO({
+            data: deliveryDTO
+          })
+        )
+      } catch (error) {
         resolve(
           new LayerDTO({
             isError: true,
-            message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
+            message: error.message
           })
         )
-        return
       }
-
-      const $informationTable = $wrap.find(".delivery-tbl").find("tbody")
-      const $progressTable = $wrap.find(".waybill-tbl").find("table")
-      const $informations = $informationTable.find("td")
-
-      const progressVOs = []
-      $progressTable
-        .find("tbody")
-        .find("tr")
-        .each((_, element) => {
-          const td = $(element).find("td")
-          const description = StringHelper.trim(td.eq(3).text())
-          const location = StringHelper.trim(td.eq(2).text())
-          const time = this.parseDateTime(td.eq(0).text(), td.eq(1).text())
-          const state = this.parseStatus(td.eq(3).text())
-          progressVOs.push(
-            new DeliveryProgressVO({
-              description,
-              location,
-              time,
-              state
-            })
-          )
-        })
-      progressVOs.reverse()
-
-      const stateVO =
-        progressVOs.length > 0
-          ? progressVOs[0].state
-          : this.parseStatus("상품준비중")
-
-      const fromVO = new DeliveryLocationVO({
-        name: this.parseLocationName($informations.eq(1).text()),
-        time:
-          progressVOs.length > 0 ? progressVOs[progressVOs.length - 1].time : ""
-      })
-
-      const toVO = new DeliveryLocationVO({
-        name: this.parseLocationName($informations.eq(2).text()),
-        time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
-      })
-
-      const deliveryDTO = new DeliveryDTO({
-        from: fromVO,
-        to: toVO,
-        progresses: progressVOs,
-        state: stateVO
-      })
-
-      resolve(
-        new LayerDTO({
-          data: deliveryDTO
-        })
-      )
     })
   }
 

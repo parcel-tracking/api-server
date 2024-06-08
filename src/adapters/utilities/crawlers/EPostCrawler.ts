@@ -30,77 +30,86 @@ export default class EPostCrawler implements ICrawler {
         return
       }
 
-      const resData = await trackingRes.text()
-      const $ = cheerio.load(resData)
-      const $informationTable = $("#print").find("table")
-      const $progressTable = $("#processTable")
-      const $informations = $informationTable.find("td")
+      try {
+        const resData = await trackingRes.text()
+        const $ = cheerio.load(resData)
+        const $informationTable = $("#print").find("table")
+        const $progressTable = $("#processTable")
+        const $informations = $informationTable.find("td")
 
-      if ($informations.length === 0) {
+        if ($informations.length === 0) {
+          resolve(
+            new LayerDTO({
+              isError: true,
+              message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
+            })
+          )
+          return
+        }
+
+        const progressVOs = []
+        $progressTable
+          .find("tbody")
+          .find("tr")
+          .each((_, element) => {
+            const td = $(element).find("td")
+            const descriptionText = StringHelper.trim(td.eq(3).text())
+            const description = descriptionText.includes("소포 물품 사진")
+              ? "접수"
+              : descriptionText
+            const location = td.eq(2).find("a").eq(0).text()
+            const time = this.parseDateTime(
+              td.eq(0).html() + " " + td.eq(1).html()
+            )
+            const state = this.parseStatus(td.eq(3).text())
+            progressVOs.push(
+              new DeliveryProgressVO({
+                description,
+                location,
+                time,
+                state
+              })
+            )
+          })
+        progressVOs.reverse()
+
+        const stateVO =
+          progressVOs.length > 0
+            ? progressVOs[0].state
+            : this.parseStatus("상품준비중")
+
+        const from = decode($informations.eq(0).html()).split("<br>")
+        const fromVO = new DeliveryLocationVO({
+          name: this.parseLocationName(from[0]),
+          time: this.parseDateTime(from[1])
+        })
+
+        const to = decode($informations.eq(1).html()).split("<br>")
+        const toVO = new DeliveryLocationVO({
+          name: this.parseLocationName(to[0]),
+          time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
+        })
+
+        const deliveryDTO = new DeliveryDTO({
+          from: fromVO,
+          to: toVO,
+          progresses: progressVOs,
+          state: stateVO
+        })
+
+        resolve(
+          new LayerDTO({
+            data: deliveryDTO
+          })
+        )
+      } catch (error) {
         resolve(
           new LayerDTO({
             isError: true,
-            message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
+            message: error.message
           })
         )
-        return
       }
-
-      const progressVOs = []
-      $progressTable
-        .find("tbody")
-        .find("tr")
-        .each((_, element) => {
-          const td = $(element).find("td")
-          const descriptionText = StringHelper.trim(td.eq(3).text())
-          const description = descriptionText.includes("소포 물품 사진")
-            ? "접수"
-            : descriptionText
-          const location = td.eq(2).find("a").eq(0).text()
-          const time = this.parseDateTime(
-            td.eq(0).html() + " " + td.eq(1).html()
-          )
-          const state = this.parseStatus(td.eq(3).text())
-          progressVOs.push(
-            new DeliveryProgressVO({
-              description,
-              location,
-              time,
-              state
-            })
-          )
-        })
-      progressVOs.reverse()
-
-      const stateVO =
-        progressVOs.length > 0
-          ? progressVOs[0].state
-          : this.parseStatus("상품준비중")
-
-      const from = decode($informations.eq(0).html()).split("<br>")
-      const fromVO = new DeliveryLocationVO({
-        name: this.parseLocationName(from[0]),
-        time: this.parseDateTime(from[1])
-      })
-
-      const to = decode($informations.eq(1).html()).split("<br>")
-      const toVO = new DeliveryLocationVO({
-        name: this.parseLocationName(to[0]),
-        time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
-      })
-
-      const deliveryDTO = new DeliveryDTO({
-        from: fromVO,
-        to: toVO,
-        progresses: progressVOs,
-        state: stateVO
-      })
-
-      resolve(
-        new LayerDTO({
-          data: deliveryDTO
-        })
-      )
     })
   }
 

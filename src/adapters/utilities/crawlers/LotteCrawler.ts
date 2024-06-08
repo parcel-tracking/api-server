@@ -29,72 +29,83 @@ export default class LotteCrawler implements ICrawler {
         return
       }
 
-      const resData = await trackingRes.text()
-      const $ = cheerio.load(resData)
-      const $wrap = $(".contArea")
+      try {
+        const resData = await trackingRes.text()
+        const $ = cheerio.load(resData)
+        const $wrap = $(".contArea")
 
-      const $informationTable = $wrap.find("table").eq(0)
-      const $progressTable = $wrap.find("table").eq(1)
-      const $informations = $informationTable.find("tbody").find("td")
+        const $informationTable = $wrap.find("table").eq(0)
+        const $progressTable = $wrap.find("table").eq(1)
+        const $informations = $informationTable.find("tbody").find("td")
 
-      if ($informations.length === 1) {
+        if ($informations.length === 1) {
+          resolve(
+            new LayerDTO({
+              isError: true,
+              message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
+            })
+          )
+          return
+        }
+
+        const progressVOs = []
+        $progressTable
+          .find("tbody")
+          .find("tr")
+          .each((_, element) => {
+            const td = $(element).find("td")
+            const description = StringHelper.trim(td.eq(3).text())
+            const location = StringHelper.trim(td.eq(2).text())
+            const time = this.parseDateTime(StringHelper.trim(td.eq(1).html()))
+            const state = this.parseStatus(td.eq(0).text())
+            progressVOs.push(
+              new DeliveryProgressVO({
+                description,
+                location,
+                time,
+                state
+              })
+            )
+          })
+
+        const stateVO =
+          progressVOs.length > 0
+            ? progressVOs[0].state
+            : this.parseStatus("상품준비중")
+
+        const fromVO = new DeliveryLocationVO({
+          name: this.parseLocationName($informations.eq(1).text()),
+          time:
+            progressVOs.length > 0
+              ? progressVOs[progressVOs.length - 1].time
+              : ""
+        })
+
+        const toVO = new DeliveryLocationVO({
+          name: this.parseLocationName($informations.eq(2).text()),
+          time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
+        })
+
+        const deliveryDTO = new DeliveryDTO({
+          from: fromVO,
+          to: toVO,
+          progresses: progressVOs,
+          state: stateVO
+        })
+
+        resolve(
+          new LayerDTO({
+            data: deliveryDTO
+          })
+        )
+      } catch (error) {
         resolve(
           new LayerDTO({
             isError: true,
-            message: "해당 운송장이 존재하지 않거나 조회할 수 없습니다."
+            message: error.message
           })
         )
-        return
       }
-
-      const progressVOs = []
-      $progressTable
-        .find("tbody")
-        .find("tr")
-        .each((_, element) => {
-          const td = $(element).find("td")
-          const description = StringHelper.trim(td.eq(3).text())
-          const location = StringHelper.trim(td.eq(2).text())
-          const time = this.parseDateTime(StringHelper.trim(td.eq(1).html()))
-          const state = this.parseStatus(td.eq(0).text())
-          progressVOs.push(
-            new DeliveryProgressVO({
-              description,
-              location,
-              time,
-              state
-            })
-          )
-        })
-
-      const stateVO =
-        progressVOs.length > 0
-          ? progressVOs[0].state
-          : this.parseStatus("상품준비중")
-
-      const fromVO = new DeliveryLocationVO({
-        name: this.parseLocationName($informations.eq(1).text()),
-        time:
-          progressVOs.length > 0 ? progressVOs[progressVOs.length - 1].time : ""
-      })
-
-      const toVO = new DeliveryLocationVO({
-        name: this.parseLocationName($informations.eq(2).text()),
-        time: stateVO.name === "배달완료" ? progressVOs[0].time : ""
-      })
-
-      const deliveryDTO = new DeliveryDTO({
-        from: fromVO,
-        to: toVO,
-        progresses: progressVOs,
-        state: stateVO
-      })
-
-      resolve(
-        new LayerDTO({
-          data: deliveryDTO
-        })
-      )
     })
   }
 
