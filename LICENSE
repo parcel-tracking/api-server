@@ -11,3 +11,41 @@ as the name is changed.
   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
   0. You just DO WHAT THE FUCK YOU WANT TO.
+
+This project contains components that use different licenses:
+
+### NestJS
+NestJS is licensed under the MIT License.
+For more information, see https://github.com/nestjs/nest/blob/master/LICENSE
+
+### sequelize
+sequelize is licensed under the MIT License.
+For more information, see https://github.com/sequelize/sequelize/blob/main/LICENSE
+
+### mysql2
+mysql2 is licensed under the MIT License.
+For more information, see https://github.com/sidorares/node-mysql2/blob/master/License
+
+### cheerio
+cheerio is licensed under the MIT License.
+For more information, see https://github.com/cheeriojs/cheerio/blob/main/LICENSE
+
+### iconv-lite
+iconv-lite is licensed under the MIT License.
+For more information, see https://github.com/ashtuchkin/iconv-lite/blob/master/LICENSE
+
+### html-entities
+iconv-lite is licensed under the MIT License.
+For more information, see https://github.com/mdevils/html-entities/blob/master/LICENSE
+
+### tough-cookie
+tough-cookie is licensed under the BSD-3-Clause license.
+For more information, see https://github.com/salesforce/tough-cookie/blob/master/LICENSE
+
+### reflect-metadata
+tough-cookie is licensed under the Apache License 2.0.
+For more information, see https://github.com/rbuckton/reflect-metadata/blob/main/LICENSE
+
+### rxjs
+tough-cookie is licensed under the Apache License 2.0.
+For more information, see https://github.com/ReactiveX/rxjs/blob/master/LICENSE.txt
