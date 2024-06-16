@@ -1,18 +1,19 @@
 import { Module } from "@nestjs/common"
 import { SequelizeModule } from "@nestjs/sequelize"
-import NTrackerController from "../controllers/NTrackerController"
-import NTrackerUseCase from "../usecases/NTrackerUseCase"
-import NTrackerRepository from "../repositories/NTrackerRepository"
-import NCarrierRepository from "../repositories/NCarrierRepository"
+import fetch from "node-fetch"
 import CarrierModel from "../models/CarrierModel"
 import NServerHTTP from "../infrastructures/NServerHTTP"
+import NTrackerRepository from "../repositories/NTrackerRepository"
+import NCarrierRepository from "../repositories/NCarrierRepository"
+import NTrackerUseCase from "../usecases/NTrackerUseCase"
+import NTrackerController from "../controllers/NTrackerController"
 
 @Module({
   imports: [SequelizeModule.forFeature([CarrierModel])],
   providers: [
     {
       provide: "IHttpServer",
-      useValue: globalThis.fetch.bind(globalThis)
+      useValue: fetch
     },
     {
       provide: "IServerHTTP",
