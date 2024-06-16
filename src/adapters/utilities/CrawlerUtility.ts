@@ -5,7 +5,7 @@ import CJLogisticsCrawler from "./crawlers/CJLogisticsCrawler"
 import DaesinCrawler from "./crawlers/DaesinCrawler"
 import EPostCrawler from "./crawlers/EPostCrawler"
 import HanjinCrawler from "./crawlers/HanjinCrawler"
-import KDExpCrawler from "./crawlers/KDexpCrawler"
+import KDExpCrawler from "./crawlers/KDExpCrawler"
 import LogenCrawler from "./crawlers/LogenCrawler"
 import LotteCrawler from "./crawlers/LotteCrawler"
 
