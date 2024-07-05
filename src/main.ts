@@ -9,21 +9,21 @@ async function bootstrap() {
     `chrome-extension://${process.env.EXTENSION_ID}`
   ]
 
-  app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true)
-      } else {
-        callback(new Error("Not allowed by CORS"))
-      }
-    },
-    credentials: true
-  })
+  // app.enableCors({
+  //   origin: (origin, callback) => {
+  //     if (!origin || allowedOrigins.includes(origin)) {
+  //       callback(null, true)
+  //     } else {
+  //       callback(new Error("Not allowed by CORS"))
+  //     }
+  //   },
+  //   credentials: true
+  // })
 
   // Code for application review
-  // app.enableCors({
-  //   origin: "*"
-  // })
+  app.enableCors({
+    origin: "*"
+  })
 
   await app.listen(process.env.PORT || 3000)
 }
