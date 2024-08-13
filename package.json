@@ -4,7 +4,7 @@
   "description": "",
   "private": true,
   "author": "falsy",
-  "license": "WTFPL license",
+  "license": "The Unlicense",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
