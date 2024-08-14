@@ -94,6 +94,9 @@ class CJLogisticsCrawler {
         return short + (short.includes("*") ? "" : "*");
     }
     parseStatus(value) {
+        if (typeof value !== "string") {
+            return DeliveryStateGenerator_1.default.getState("상품준비중");
+        }
         if (["41", "42", "44"].includes(value)) {
             return DeliveryStateGenerator_1.default.getState("상품이동중");
         }

@@ -124,7 +124,10 @@ export default class EPostCrawler implements ICrawler {
     return dateTime[0].replace(/\./g, "-") + time
   }
 
-  private parseStatus(value: string) {
+  private parseStatus(value?: string) {
+    if (typeof value !== "string") {
+      return DeliveryStateGenerator.getState("상품이동중")
+    }
     if (value.includes("상품준비중")) {
       return DeliveryStateGenerator.getState("상품준비중")
     }

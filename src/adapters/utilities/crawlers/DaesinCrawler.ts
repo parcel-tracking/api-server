@@ -136,6 +136,9 @@ export default class DaesinCrawler implements ICrawler {
   }
 
   private parseStatus(value?: string) {
+    if (typeof value !== "string") {
+      return DeliveryStateGenerator.getState("상품이동중")
+    }
     if (value.includes("배송완료")) {
       return DeliveryStateGenerator.getState("배달완료")
     }

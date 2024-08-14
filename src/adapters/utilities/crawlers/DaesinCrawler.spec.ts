@@ -6,7 +6,10 @@ import DeliveryStateGenerator from "../helpers/DeliveryStateGenerator"
 import DeliveryDTO from "../../../core/dtos/DeliveryDTO"
 import DaesinMockHTML from "./DaesinMockHTML"
 
-const parseStatus = (value: string = "") => {
+const parseStatus = (value?: string) => {
+  if (typeof value !== "string") {
+    return DeliveryStateGenerator.getState("상품이동중")
+  }
   if (value.includes("배송완료")) {
     return DeliveryStateGenerator.getState("배달완료")
   }

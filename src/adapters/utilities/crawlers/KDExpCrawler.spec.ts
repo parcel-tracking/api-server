@@ -5,6 +5,9 @@ import DeliveryDTO from "../../../core/dtos/DeliveryDTO"
 import KDExpMock from "./KDExpMock"
 
 const parseStatus = (value?: string) => {
+  if (typeof value !== "string") {
+    return DeliveryStateGenerator.getState("상품이동중")
+  }
   if (value.includes("접수완료")) {
     return DeliveryStateGenerator.getState("상품인수")
   }

@@ -100,6 +100,9 @@ class DaesinCrawler {
         return StringHelper_1.default.trim(value + ":00");
     }
     parseStatus(value) {
+        if (typeof value !== "string") {
+            return DeliveryStateGenerator_1.default.getState("상품이동중");
+        }
         if (value.includes("배송완료")) {
             return DeliveryStateGenerator_1.default.getState("배달완료");
         }

@@ -7,7 +7,10 @@ import StringHelper from "../helpers/StringHelper"
 import DeliveryStateGenerator from "../helpers/DeliveryStateGenerator"
 import DeliveryDTO from "../../../core/dtos/DeliveryDTO"
 
-const parseStatus = (value: string) => {
+const parseStatus = (value?: string) => {
+  if (typeof value !== "string") {
+    return DeliveryStateGenerator.getState("상품이동중")
+  }
   if (value.includes("접수")) {
     return DeliveryStateGenerator.getState("상품인수")
   }

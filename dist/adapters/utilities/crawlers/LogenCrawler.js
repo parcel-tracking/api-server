@@ -92,6 +92,9 @@ class LogenCrawler {
         return StringHelper_1.default.trim(value + ":00");
     }
     parseStatus(value) {
+        if (typeof value !== "string") {
+            return DeliveryStateGenerator_1.default.getState("상품이동중");
+        }
         if (value.includes("배송출고")) {
             return DeliveryStateGenerator_1.default.getState("배달출발");
         }
