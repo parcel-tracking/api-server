@@ -128,6 +128,9 @@ export default class CJLogisticsCrawler implements ICrawler {
   }
 
   private parseStatus(value?: string) {
+    if (typeof value !== "string") {
+      return DeliveryStateGenerator.getState("상품준비중")
+    }
     if (["41", "42", "44"].includes(value)) {
       return DeliveryStateGenerator.getState("상품이동중")
     }

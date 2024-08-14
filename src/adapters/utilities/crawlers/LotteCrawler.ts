@@ -122,6 +122,9 @@ export default class LotteCrawler implements ICrawler {
   }
 
   private parseStatus(value?: string) {
+    if (typeof value !== "string") {
+      return DeliveryStateGenerator.getState("상품이동중")
+    }
     if (value.includes("상품접수")) {
       return DeliveryStateGenerator.getState("상품인수")
     }

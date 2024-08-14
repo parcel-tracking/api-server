@@ -77,6 +77,9 @@ class KDExpCrawler {
         return value.split(".")[0];
     }
     parseStatus(value) {
+        if (typeof value !== "string") {
+            return DeliveryStateGenerator_1.default.getState("상품이동중");
+        }
         if (value.includes("접수완료")) {
             return DeliveryStateGenerator_1.default.getState("상품인수");
         }

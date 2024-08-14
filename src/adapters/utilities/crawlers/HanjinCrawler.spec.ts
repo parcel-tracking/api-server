@@ -6,7 +6,10 @@ import DeliveryStateGenerator from "../helpers/DeliveryStateGenerator"
 import DeliveryDTO from "../../../core/dtos/DeliveryDTO"
 import HanjinMockHTML from "./HanjinMockHTML"
 
-const parseStatus = (value: string) => {
+const parseStatus = (value?: string) => {
+  if (typeof value !== "string") {
+    return DeliveryStateGenerator.getState("상품이동중")
+  }
   if (value.includes("집하")) {
     return DeliveryStateGenerator.getState("상품인수")
   }

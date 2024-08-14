@@ -124,6 +124,9 @@ export default class LogenCrawler implements ICrawler {
   }
 
   private parseStatus(value?: string) {
+    if (typeof value !== "string") {
+      return DeliveryStateGenerator.getState("상품이동중")
+    }
     if (value.includes("배송출고")) {
       return DeliveryStateGenerator.getState("배달출발")
     }

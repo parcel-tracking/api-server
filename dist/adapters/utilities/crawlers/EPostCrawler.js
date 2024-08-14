@@ -97,6 +97,9 @@ class EPostCrawler {
         return dateTime[0].replace(/\./g, "-") + time;
     }
     parseStatus(value) {
+        if (typeof value !== "string") {
+            return DeliveryStateGenerator_1.default.getState("상품이동중");
+        }
         if (value.includes("상품준비중")) {
             return DeliveryStateGenerator_1.default.getState("상품준비중");
         }

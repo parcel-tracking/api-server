@@ -102,6 +102,9 @@ export default class KDExpCrawler implements ICrawler {
   }
 
   private parseStatus(value?: string) {
+    if (typeof value !== "string") {
+      return DeliveryStateGenerator.getState("상품이동중")
+    }
     if (value.includes("접수완료")) {
       return DeliveryStateGenerator.getState("상품인수")
     }

@@ -93,6 +93,9 @@ class LotteCrawler {
         return date + " " + time;
     }
     parseStatus(value) {
+        if (typeof value !== "string") {
+            return DeliveryStateGenerator_1.default.getState("상품이동중");
+        }
         if (value.includes("상품접수")) {
             return DeliveryStateGenerator_1.default.getState("상품인수");
         }

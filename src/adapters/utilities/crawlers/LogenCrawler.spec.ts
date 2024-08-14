@@ -7,6 +7,9 @@ import DeliveryDTO from "../../../core/dtos/DeliveryDTO"
 import LogenMockHTML from "./LogenMockHTML"
 
 const parseStatus = (value?: string) => {
+  if (typeof value !== "string") {
+    return DeliveryStateGenerator.getState("상품이동중")
+  }
   if (value.includes("배송출고")) {
     return DeliveryStateGenerator.getState("배달출발")
   }

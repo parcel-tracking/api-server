@@ -96,6 +96,9 @@ class HanjinCrawler {
         return date + " " + time + ":00";
     }
     parseStatus(value) {
+        if (typeof value !== "string") {
+            return DeliveryStateGenerator_1.default.getState("상품이동중");
+        }
         if (value.includes("집하")) {
             return DeliveryStateGenerator_1.default.getState("상품인수");
         }
